@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* خلفية أوف وايت دافئة ومريحة جداً للعين */
+  --background: #f4f4f2;
+  --foreground: #1c1917;
 }
 
 @theme inline {
@@ -12,15 +13,61 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* إصلاح التباين التلقائي للرمادي والأوف وايت والذهبي */
+
+/* 1. خلفيات الكروت والأقسام */
+.bg-neutral-900,
+.bg-neutral-950,
+.bg-black\/55 {
+  background-color: rgba(28, 25, 23, 0.75) !important;
+}
+
+.bg-neutral-800,
+.bg-\[\#303030\] {
+  background-color: #262626 !important;
+}
+
+/* 2. تصحيح ألوان النصوص لتكون واضحة تماماً */
+.text-white,
+h1, h2, h3 {
+  color: #fafaf9 !important; /* أبيض دافئ عالي التباين للنصوص الهامة */
+}
+
+.text-neutral-400,
+.text-gray-400,
+p {
+  color: #d6d3d1 !important; /* رمادي فاتح مريح وواضح */
+}
+
+/* 3. عناصر الذهبي الملوكي */
+.text-amber-400,
+.text-amber-500 {
+  color: #d4af37 !important;
+}
+
+.bg-amber-400,
+.bg-amber-500 {
+  background-color: #d4af37 !important;
+  color: #1c1917 !important;
+}
+
+.border-amber-400,
+.border-amber-400\/40 {
+  border-color: #d4af37 !important;
+}
+
+/* 4. إخفاء خلفية الفوتر البيضاء الحادة لتنسجم مع باقي الصفحة */
+footer,
+footer .bg-neutral-950 {
+  background-color: #18181b !important;
 }
