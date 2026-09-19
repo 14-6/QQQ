@@ -23,7 +23,7 @@ const brandsData = [
   { id: 9, name: 'Rashat Milh', arabicName: 'رشة ملح', category: 'breakfast', handle: '@rashat.qa', logo: '/logos/rashat.png', typeAr: 'فطور وبوكسات', typeEn: 'Breakfast & Boxes', locationsAr: ['مدينة خليفة'], locationsEn: ['Madinat Khalfiah'] },
   { id: 10, name: 'Baverian', arabicName: 'بافاريان', category: 'sweets', handle: '@baverian.qtr', logo: '/logos/baverian.png', typeAr: 'شوكولاتة وهدايا', typeEn: 'Chocolate & Gifts', locationsAr: ['طلب أونلاين'], locationsEn: ['Online Order'] },
   { id: 11, name: 'Dawar Al Saada', arabicName: 'دوار السعادة', category: 'breakfast', handle: '@dawar.qa', logo: '/logos/dawar.png', typeAr: 'مطعم فطور وجلسات', typeEn: 'Breakfast & Dine-in', locationsAr: ['السد'], locationsEn: ['Al Sadd'] },
-  { id: 12, name: 'Burgreen', arabicName: 'بورجرين', category: 'fastfood', handle: '@burgreen.qa', logo: '/logos/burgreen.png', typeAr: 'برجر فاخر وجلسات', typeEn: 'Premium Burger & Dine-in', locationsAr: ['اللؤلؤة'], locationsEn: ['The Pearl'] },
+  { id: 12, name: 'Burgreen', arabicName: 'برجرين', category: 'fastfood', handle: '@burgreen.qa', logo: '/logos/burgreen.png', typeAr: 'برجر فاخر وجلسات', typeEn: 'Premium Burger & Dine-in', locationsAr: ['اللؤلؤة'], locationsEn: ['The Pearl'] },
   { id: 13, name: 'Tick', arabicName: 'تيك', category: 'fastfood', handle: '@tick.qa', logo: '/logos/tick.png', typeAr: 'مطعم ومأكولات', typeEn: 'Restaurant & Eatery', locationsAr: ['الفرع الرئيسي'], locationsEn: ['Main Branch'] },
 ];
 
@@ -418,7 +418,7 @@ useEffect(() => {
                     <TwitterIcon className="w-4 h-4" />
                   </a>
                   <a
-                    href="https://wa.me/97400000000"
+                    href="https://wa.me/+97431121124"
                     target="_blank"
                     rel="noreferrer"
                     className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 hover:border-amber-400/50 transition-colors"
@@ -431,7 +431,7 @@ useEffect(() => {
 
               {/* زر واتساب مباشر */}
               <a
-                href="https://wa.me/97400000000"
+                href="https://wa.me/+97431121124"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold hover:bg-emerald-600/30 transition-all duration-300 w-fit"
