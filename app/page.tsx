@@ -418,7 +418,7 @@ useEffect(() => {
                     <TwitterIcon className="w-4 h-4" />
                   </a>
                   <a
-                    href="https://wa.me/+97431121124"
+                    href="https://wa.me/97431121124"
                     target="_blank"
                     rel="noreferrer"
                     className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 hover:border-amber-400/50 transition-colors"
@@ -431,7 +431,7 @@ useEffect(() => {
 
               {/* زر واتساب مباشر */}
               <a
-                href="https://wa.me/+97431121124"
+                href="https://wa.me/97431121124"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold hover:bg-emerald-600/30 transition-all duration-300 w-fit"
@@ -473,7 +473,7 @@ useEffect(() => {
                 {lang === 'ar' ? 'الأحد – الخميس: 9:00 صباحاً – 6:00 مساءً' : 'Sun – Thu: 9:00 AM – 6:00 PM'}
               </div>
             </div>
-{/* العمود الثالث: تصنيفات وفئات المشاريع (2 أعمدة) */}
+        {/* العمود الثالث: تصنيفات وفئات المشاريع (2 أعمدة) */}
             <div className="lg:col-span-2">
               <h4 className="text-sm font-bold text-white mb-4 border-b border-white/10 pb-2">
                 {lang === 'ar' ? 'أبرز التصنيفات' : 'Categories'}
