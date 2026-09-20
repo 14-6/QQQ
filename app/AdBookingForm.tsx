@@ -30,7 +30,7 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
 
   const modalContent = isOpen ? (
     <div 
-      className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto"
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
       style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
     >
@@ -100,24 +100,24 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
             />
           </div>
 
-          {/* التاريخ والوقت بحجم صغير ومناسب للجوال بدون تداخل */}
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            <div className="min-w-0">
-              <label className="block text-[11px] font-medium text-neutral-300 mb-1 truncate">
+          {/* التاريخ والوقت بتنسيق ثابت موحد لكل المتصفحات وانستغرام */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="w-full">
+              <label className="block text-xs font-medium text-neutral-300 mb-1 truncate">
                 {lang === 'ar' ? 'التاريخ المفضل' : 'Preferred Date'}
               </label>
               <input
                 type="date"
-                className="w-full px-2 sm:px-3 py-2 rounded-xl bg-neutral-800/80 border border-neutral-700 text-white text-[11px] sm:text-xs focus:outline-none focus:border-amber-400 transition-colors [color-scheme:dark]"
+                className="w-full h-10 px-3 rounded-xl bg-neutral-800/80 border border-neutral-700 text-white text-xs focus:outline-none focus:border-amber-400 transition-colors appearance-none [color-scheme:dark]"
               />
             </div>
-            <div className="min-w-0">
-              <label className="block text-[11px] font-medium text-neutral-300 mb-1 truncate">
+            <div className="w-full">
+              <label className="block text-xs font-medium text-neutral-300 mb-1 truncate">
                 {lang === 'ar' ? 'الوقت المفضل' : 'Preferred Time'}
               </label>
               <input
                 type="time"
-                className="w-full px-2 sm:px-3 py-2 rounded-xl bg-neutral-800/80 border border-neutral-700 text-white text-[11px] sm:text-xs focus:outline-none focus:border-amber-400 transition-colors [color-scheme:dark]"
+                className="w-full h-10 px-3 rounded-xl bg-neutral-800/80 border border-neutral-700 text-white text-xs focus:outline-none focus:border-amber-400 transition-colors appearance-none [color-scheme:dark]"
               />
             </div>
           </div>
