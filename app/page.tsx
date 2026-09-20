@@ -127,25 +127,25 @@ export default function Home() {
  {/* ==================== 1. HEADER WITH VIDEO BACKGROUND ==================== */}
 <header className="relative w-full min-h-[520px] sm:min-h-[550px] lg:h-[85vh] overflow-hidden flex items-center justify-center text-white py-12 sm:py-0">
 
-  {/* الشريط العلوي المحسّن للجوال */}
-  <div className="absolute top-4 left-0 right-0 z-50 px-4 sm:px-6 max-w-7xl mx-auto flex items-center justify-between gap-2" dir="ltr">
+  {/* الشريط العلوي الموحد والمستقيم تماماً */}
+  <div className="absolute top-4 left-0 right-0 z-50 px-3 sm:px-6 max-w-7xl mx-auto flex items-center justify-between gap-2" dir="ltr">
     
-    {/* زر تغيير اللغة - يسار */}
+    {/* 1. زر تغيير اللغة */}
     <button
       onClick={toggleLanguage}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur transition-all duration-300 active:scale-95 cursor-pointer border border-white/20 bg-black/50 hover:bg-black/70 text-amber-400 shrink-0"
+      className="flex items-center justify-center gap-1.5 h-9 px-3 rounded-full text-xs font-semibold border border-white/20 bg-black/60 hover:bg-black/80 text-amber-400 backdrop-blur-md transition-all duration-300 active:scale-95 shrink-0 whitespace-nowrap shadow-sm cursor-pointer"
     >
-      <Globe className="w-3.5 h-3.5 text-amber-400" />
+      <Globe className="w-3.5 h-3.5 text-amber-400 shrink-0" />
       <span>{lang === 'ar' ? 'English' : 'عربي'}</span>
     </button>
 
-    {/* شعار QQQ - في المنتصف تماماً */}
-    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-amber-400/60 bg-black/60 backdrop-blur-md flex items-center justify-center shadow-lg hover:scale-105 transition-transform duration-300 shrink-0">
+    {/* 2. شعار QQQ في المنتصف تماماً */}
+    <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border border-amber-400/60 bg-black/60 backdrop-blur-md flex items-center justify-center shadow-lg hover:scale-105 transition-transform duration-300 shrink-0">
       <span className="text-xs sm:text-sm font-black tracking-widest text-amber-400">QQQ</span>
     </div>
 
-    {/* زر حجز الإعلان - يمين */}
-    <div className="shrink-0">
+    {/* 3. زر حجز الإعلان */}
+    <div className="shrink-0 flex items-center">
       <AdBookingForm lang={lang} />
     </div>
 
