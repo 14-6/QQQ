@@ -41,7 +41,7 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
       />
 
       {/* بطاقة نموذج الحجز */}
-      <div className="relative w-full max-w-lg my-auto bg-neutral-900 border border-neutral-800 rounded-2xl p-5 sm:p-6 text-white shadow-2xl max-h-[85vh] overflow-y-auto">
+      <div className="relative w-full max-w-lg my-auto bg-neutral-900 border border-neutral-800 rounded-2xl p-5 sm:p-6 text-white shadow-2xl max-h-[90vh] overflow-y-auto">
         
         {/* زر الإغلاق */}
         <button
@@ -63,7 +63,7 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
         </p>
 
         {/* النموذج */}
-        <form onSubmit={(e) => { e.preventDefault(); setIsOpen(false); }} className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); setIsOpen(false); }} className="space-y-3.5">
           <div>
             <label className="block text-xs font-medium text-neutral-300 mb-1">
               {lang === 'ar' ? 'الاسم / الشركة' : 'Name / Company'}
@@ -100,23 +100,24 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+          {/* التاريخ والوقت بحجم صغير ومناسب للجوال بدون تداخل */}
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <div className="min-w-0">
+              <label className="block text-[11px] font-medium text-neutral-300 mb-1 truncate">
                 {lang === 'ar' ? 'التاريخ المفضل' : 'Preferred Date'}
               </label>
               <input
                 type="date"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700 text-white text-xs focus:outline-none focus:border-amber-400 transition-colors"
+                className="w-full px-2 sm:px-3 py-2 rounded-xl bg-neutral-800/80 border border-neutral-700 text-white text-[11px] sm:text-xs focus:outline-none focus:border-amber-400 transition-colors [color-scheme:dark]"
               />
             </div>
-            <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <div className="min-w-0">
+              <label className="block text-[11px] font-medium text-neutral-300 mb-1 truncate">
                 {lang === 'ar' ? 'الوقت المفضل' : 'Preferred Time'}
               </label>
               <input
                 type="time"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700 text-white text-xs focus:outline-none focus:border-amber-400 transition-colors"
+                className="w-full px-2 sm:px-3 py-2 rounded-xl bg-neutral-800/80 border border-neutral-700 text-white text-[11px] sm:text-xs focus:outline-none focus:border-amber-400 transition-colors [color-scheme:dark]"
               />
             </div>
           </div>
@@ -146,7 +147,6 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
 
   return (
     <>
-      {/* زر فتح النافذة */}
       <button
         onClick={() => setIsOpen(true)}
         className="flex items-center gap-1.5 h-9 px-3 rounded-full text-xs font-semibold border border-amber-400/50 bg-black/60 hover:bg-black/80 text-amber-400 backdrop-blur-md transition-all duration-300 active:scale-95 whitespace-nowrap shrink-0 shadow-sm cursor-pointer"
@@ -155,7 +155,6 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
         <span>{lang === 'ar' ? 'حجز إعلان' : 'Book Ad'}</span>
       </button>
 
-      {/* نقل المودال مباشرة إلى document.body لحل مشكلة Stacking Context في الجوالات */}
       {mounted && isOpen && createPortal(modalContent, document.body)}
     </>
   );
