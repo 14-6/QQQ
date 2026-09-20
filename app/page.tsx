@@ -341,7 +341,6 @@ export default function Home() {
                     title="Instagram"
                   >
                     <InstagramIcon className="w-4 h-4 text-amber-400" />
-                    <ExternalLink className="w-3 h-3 text-neutral-400" />
                   </a>
                 </div>
 
