@@ -7,7 +7,8 @@ import {
   MapPin, 
   Sparkles, 
   Globe, 
-  Mail 
+  Mail,
+  Search 
 } from 'lucide-react';
 import AdBookingForm from './AdBookingForm';
 
@@ -138,118 +139,118 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#121212] text-white font-sans overflow-x-hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
 
- {/* ==================== 1. HEADER WITH VIDEO BACKGROUND ==================== */}
-<header className="relative w-full min-h-[520px] sm:min-h-[550px] lg:h-[85vh] overflow-hidden flex items-center justify-center text-white py-12 sm:py-0">
+      {/* ==================== 1. HEADER WITH VIDEO BACKGROUND ==================== */}
+      <header className="relative w-full min-h-[520px] sm:min-h-[550px] lg:h-[85vh] overflow-hidden flex items-center justify-center text-white py-12 sm:py-0">
 
-  {/* الشريط العلوي الموحد والمستقيم تماماً */}
-  <div className="absolute top-4 left-0 right-0 z-50 px-3 sm:px-6 max-w-7xl mx-auto flex items-center justify-between gap-2" dir="ltr">
-    
-    {/* 1. زر تغيير اللغة */}
-    <button
-      onClick={toggleLanguage}
-      className="flex items-center justify-center gap-1.5 h-9 px-3 rounded-full text-xs font-semibold border border-white/20 bg-black/60 hover:bg-black/80 text-amber-400 backdrop-blur-md transition-all duration-300 active:scale-95 shrink-0 whitespace-nowrap shadow-sm cursor-pointer"
-    >
-      <Globe className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-      <span>{lang === 'ar' ? 'English' : 'عربي'}</span>
-    </button>
+        {/* الشريط العلوي الموحد والمستقيم تماماً */}
+        <div className="absolute top-4 left-0 right-0 z-50 px-3 sm:px-6 max-w-7xl mx-auto flex items-center justify-between gap-2" dir="ltr">
+          
+          {/* 1. زر تغيير اللغة */}
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center justify-center gap-1.5 h-9 px-3 rounded-full text-xs font-semibold border border-white/20 bg-black/60 hover:bg-black/80 text-amber-400 backdrop-blur-md transition-all duration-300 active:scale-95 shrink-0 whitespace-nowrap shadow-sm cursor-pointer"
+          >
+            <Globe className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span>{lang === 'ar' ? 'English' : 'عربي'}</span>
+          </button>
 
-    {/* 2. شعار QQQ في المنتصف تماماً */}
-    <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border border-amber-400/60 bg-black/60 backdrop-blur-md flex items-center justify-center shadow-lg hover:scale-105 transition-transform duration-300 shrink-0">
-      <span className="text-xs sm:text-sm font-black tracking-widest text-amber-400">QQQ</span>
-    </div>
+          {/* 2. شعار QQQ في المنتصف تماماً */}
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border border-amber-400/60 bg-black/60 backdrop-blur-md flex items-center justify-center shadow-lg hover:scale-105 transition-transform duration-300 shrink-0">
+            <span className="text-xs sm:text-sm font-black tracking-widest text-amber-400">QQQ</span>
+          </div>
 
-    {/* 3. زر حجز الإعلان */}
-    <div className="shrink-0 flex items-center">
-      <AdBookingForm lang={lang} />
-    </div>
+          {/* 3. زر حجز الإعلان */}
+          <div className="shrink-0 flex items-center">
+            <AdBookingForm lang={lang} />
+          </div>
 
-  </div>
-
-  {/* خلفية الفيديو */}
-  <div className="absolute inset-0 w-full h-full bg-black">
-    {videoSources.map((src, index) => (
-      <video
-        key={src}
-        src={src}
-        autoPlay
-        muted
-        loop
-        playsInline
-        onEnded={handleVideoEnded}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
-          index === currentVideoIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
-        }`}
-      />
-    ))}
-  </div>
-
-  <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] z-20" />
-
-  {/* محتوى الهيدر الرئيسي */}
-  <div className="relative z-30 text-center px-4 max-w-4xl mx-auto flex flex-col items-center justify-center pt-20 sm:pt-12">
-    
-    <h1 className="text-2xl sm:text-4xl md:text-6xl font-black tracking-wide mb-2 text-white drop-shadow-md">
-      {lang === 'ar' ? 'عبدالله الغافري' : 'Abdulla AlGhafri'}
-    </h1>
-    
-    <p className="text-amber-400 text-[11px] sm:text-xs md:text-sm font-semibold tracking-wider mb-3 sm:mb-4 uppercase flex items-center gap-1.5">
-      <Sparkles className="w-3.5 h-3.5 text-amber-400" /> A. ALGHAFRI | QQQ GROUP
-    </p>
-
-    <p className="max-w-xl text-neutral-200 text-xs sm:text-sm md:text-base leading-relaxed font-light mb-6">
-      {t.subtitle}
-    </p>
-
-    {/* بطاقة الإحصائيات */}
-    <div className="flex items-center justify-around w-full max-w-sm sm:max-w-lg bg-neutral-900/70 backdrop-blur-md border border-neutral-700/50 rounded-2xl p-3 sm:p-4 my-2 text-white shadow-xl">
-      
-      <div className="text-center px-1 sm:px-2">
-        <div className="text-xl sm:text-2xl font-bold text-amber-400">13</div>
-        <div className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1">{t.brandsCount}</div>
-      </div>
-
-      <div className="h-6 sm:h-8 w-[1px] bg-neutral-700/60"></div>
-
-      <div className="text-center px-1 sm:px-2">
-        <div className="flex items-center justify-center gap-1 text-xl sm:text-2xl font-bold">
-          <span>+2.5M</span>
-          <svg className="w-3.5 h-3.5 text-pink-500 fill-current shrink-0" viewBox="0 0 24 24">
-            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-          </svg>
         </div>
-        <div className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1">Instagram</div>
-      </div>
 
-      <div className="h-6 sm:h-8 w-[1px] bg-neutral-700/60"></div>
-
-      <div className="text-center px-1 sm:px-2">
-        <div className="flex items-center justify-center gap-1 text-xl sm:text-2xl font-bold">
-          <span>+4.5M</span>
-          <svg className="w-4 h-4 text-red-600 fill-current shrink-0" viewBox="0 0 24 24">
-            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-          </svg>
+        {/* خلفية الفيديو */}
+        <div className="absolute inset-0 w-full h-full bg-black">
+          {videoSources.map((src, index) => (
+            <video
+              key={src}
+              src={src}
+              autoPlay
+              muted
+              loop
+              playsInline
+              onEnded={handleVideoEnded}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
+                index === currentVideoIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+              }`}
+            />
+          ))}
         </div>
-        <div className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1">YouTube</div>
-      </div>
-    </div>
 
-    <div className="flex gap-2 mt-3 sm:mt-5">
-      {videoSources.map((_, idx) => (
-        <button
-          key={idx}
-          onClick={() => setCurrentVideoIndex(idx)}
-          className={`h-1.5 rounded-full transition-all duration-300 ${
-            idx === currentVideoIndex ? 'w-8 bg-amber-400' : 'w-2 bg-white/40'
-          }`}
-          aria-label={`Video ${idx + 1}`}
-        />
-      ))}
-    </div>
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] z-20" />
 
-  </div>
+        {/* محتوى الهيدر الرئيسي */}
+        <div className="relative z-30 text-center px-4 max-w-4xl mx-auto flex flex-col items-center justify-center pt-20 sm:pt-12">
+          
+          <h1 className="text-2xl sm:text-4xl md:text-6xl font-black tracking-wide mb-2 text-white drop-shadow-md">
+            {lang === 'ar' ? 'عبدالله الغافري' : 'Abdulla AlGhafri'}
+          </h1>
+          
+          <p className="text-amber-400 text-[11px] sm:text-xs md:text-sm font-semibold tracking-wider mb-3 sm:mb-4 uppercase flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" /> A. ALGHAFRI | QQQ GROUP
+          </p>
 
-  <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-[#121212] to-transparent z-20 pointer-events-none" />
-</header>
+          <p className="max-w-xl text-neutral-200 text-xs sm:text-sm md:text-base leading-relaxed font-light mb-6">
+            {t.subtitle}
+          </p>
+
+          {/* بطاقة الإحصائيات */}
+          <div className="flex items-center justify-around w-full max-w-sm sm:max-w-lg bg-neutral-900/70 backdrop-blur-md border border-neutral-700/50 rounded-2xl p-3 sm:p-4 my-2 text-white shadow-xl">
+            
+            <div className="text-center px-1 sm:px-2">
+              <div className="text-xl sm:text-2xl font-bold text-amber-400">13</div>
+              <div className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1">{t.brandsCount}</div>
+            </div>
+
+            <div className="h-6 sm:h-8 w-[1px] bg-neutral-700/60"></div>
+
+            <div className="text-center px-1 sm:px-2">
+              <div className="flex items-center justify-center gap-1 text-xl sm:text-2xl font-bold">
+                <span>+2.5M</span>
+                <svg className="w-3.5 h-3.5 text-pink-500 fill-current shrink-0" viewBox="0 0 24 24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              </div>
+              <div className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1">Instagram</div>
+            </div>
+
+            <div className="h-6 sm:h-8 w-[1px] bg-neutral-700/60"></div>
+
+            <div className="text-center px-1 sm:px-2">
+              <div className="flex items-center justify-center gap-1 text-xl sm:text-2xl font-bold">
+                <span>+4.5M</span>
+                <svg className="w-4 h-4 text-red-600 fill-current shrink-0" viewBox="0 0 24 24">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+              </div>
+              <div className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1">YouTube</div>
+            </div>
+          </div>
+
+          <div className="flex gap-2 mt-3 sm:mt-5">
+            {videoSources.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentVideoIndex(idx)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  idx === currentVideoIndex ? 'w-8 bg-amber-400' : 'w-2 bg-white/40'
+                }`}
+                aria-label={`Video ${idx + 1}`}
+              />
+            ))}
+          </div>
+
+        </div>
+
+        <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-[#121212] to-transparent z-20 pointer-events-none" />
+      </header>
 
       {/* ==================== 2. BRANDS SECTION ==================== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
