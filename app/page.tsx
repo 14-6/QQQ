@@ -8,25 +8,227 @@ import {
   Sparkles, 
   Globe, 
   Mail,
-  Search 
+  Search,
+  X 
 } from 'lucide-react';
 import AdBookingForm from './AdBookingForm';
 
-// === 1. بيانات البراندات ===
+// === 1. بيانات البراندات المحدثة مع منصات التوصيل وروابطها والشعارات ===
 const brandsData = [
-  { id: 1, name: 'Charger', arabicName: 'تشارجر', category: 'cafe', handle: '@charger.qa', logo: '/logos/charger.png', typeAr: 'كافيه ومشروبات', typeEn: 'Cafe & Drinks', locationsAr: ['الدحيل', 'استاد خليفة', 'معيذر', 'لوسيل'], locationsEn: ['Duhail', 'Khalifa Stadium', 'Mueather', 'Lusail'] },
-  { id: 2, name: 'Paws', arabicName: 'باوز', category: 'sweets', handle: '@pawsqa', logo: '/logos/paws.png', typeAr: 'حلويات وآيس كريم', typeEn: 'Sweets & Ice Cream', locationsAr: ['نادي الدحيل', 'الخريطيات' , 'ابوهامور', 'الريان','الوكره','الشحانيه','كتارا'], locationsEn: ['Duhail Club', 'Al Kharaitiyat', 'Abu Hamour', 'Al Rayyan', 'Al Wakra', 'Al Shahaniya', 'Katara'] },
-  { id: 3, name: 'Marcheese', arabicName: 'مارشيز', category: 'fastfood', handle: '@marcheese.qa', logo: '/logos/marcheese.png', typeAr: 'مطعم برجر', typeEn: 'Burger Spot', locationsAr: ['العزيزية', 'الدحيل', 'الوكره'], locationsEn: ['Al Aziziya', 'Al Duhail', 'Al Wakrah'] },
-  { id: 4, name: 'Cajun', arabicName: 'كيجن', category: 'fastfood', handle: '@cajun.qa', logo: '/logos/cajun.png', typeAr: 'دجاج مقرمش', typeEn: 'Crispy Chicken', locationsAr: ['سلوى', 'أم صلال', 'اسباير','الوكره'], locationsEn: ['Salwa', 'Um Salal', 'Aspire', 'Al Wakrah'] },
-  { id: 5, name: 'Slicy', arabicName: 'سلايسي', category: 'fastfood', handle: '@slicy.qa', logo: '/logos/slicy.png', typeAr: 'بيتزا', typeEn: 'Pizza Spot', locationsAr: ['نادي قطر الرياضي','مطار حمد الدولي','ابو هامور','الوكره','اسباير','ام صلال'], locationsEn: ['Qatar SC', 'Hamad Airport', 'Abu Hamour', 'Al Wakrah', 'Aspire', 'Umm Salal'] },
-  { id: 6, name: 'Frodz', arabicName: 'فرودز', category: 'healthy', handle: '@frodz.qatar', logo: '/logos/frodz.png', typeAr: 'أكلات صحية مجمدة', typeEn: 'Healthy Frozen Meals', locationsAr: ['توصيل منازل'], locationsEn: ['Home Delivery'] },
-  { id: 7, name: 'Bofawzi', arabicName: 'شاورما بوفوزي', category: 'fastfood', handle: '@bofawzi.qa', logo: '/logos/bofawzi.png', typeAr: 'مطعم شاورما', typeEn: 'Shawarma Spot', locationsAr: ['نادي الدحيل', 'الوكره', 'اسباير'], locationsEn: ['Duhail Club', 'Al Wakra', 'Aspire'] },
-  { id: 8, name: 'Salatat', arabicName: 'سلطات', category: 'healthy', handle: '@salatat.qa', logo: '/logos/salatat.png', typeAr: 'سلطات وأكل صحي', typeEn: 'Salads & Healthy Food', locationsAr: ['نادي قطر الرياضي','اسباير','ام صلال'], locationsEn: ['Qatar SC', 'Aspire', 'Umm Salal'] },
-  { id: 9, name: 'Rashat Milh', arabicName: 'رشة ملح', category: 'breakfast', handle: '@rashat.qa', logo: '/logos/rashat.png', typeAr: 'فطور وبوكسات', typeEn: 'Breakfast & Boxes', locationsAr: ['مدينة خليفة'], locationsEn: ['Madinat Khalifa'] },
-  { id: 10, name: 'Baverian', arabicName: 'بافاريان', category: 'sweets', handle: '@baverian.qtr', logo: '/logos/baverian.png', typeAr: 'شوكولاتة وهدايا', typeEn: 'Chocolate & Gifts', locationsAr: ['طلب أونلاين'], locationsEn: ['Online Order'] },
-  { id: 11, name: 'Dawar Al Saada', arabicName: 'دوار السعادة', category: 'breakfast', handle: '@dawar.qa', logo: '/logos/dawar.png', typeAr: 'مطعم فطور وجلسات', typeEn: 'Breakfast & Dine-in', locationsAr: ['السد','أم صلال'], locationsEn: ['Al Sadd', 'Umm Salal'] },
-  { id: 12, name: 'Burgreen', arabicName: 'برجرين', category: 'fastfood', handle: '@burgreen.qa', logo: '/logos/burgreen.png', typeAr: 'برجر فاخر وجلسات', typeEn: 'Premium Burger & Dine-in', locationsAr: ['اللؤلؤة'], locationsEn: ['The Pearl'] },
-  { id: 13, name: 'Tick', arabicName: 'تيك', category: 'fastfood', handle: '@tick.qa', logo: '/logos/tick.png', typeAr: 'مطعم ومأكولات', typeEn: 'Restaurant & Eatery', locationsAr: ['ازغوى','الهلال'], locationsEn: ['Izghawa', 'Al Hilal'] },
+  { 
+    id: 1, 
+    name: 'Charger', 
+    arabicName: 'تشارجر', 
+    category: 'cafe', 
+    handle: '@charger.qa', 
+    logo: '/logos/charger.png', 
+    typeAr: 'كافيه ومشروبات', 
+    typeEn: 'Cafe & Drinks', 
+    locationsAr: ['الدحيل', 'استاد خليفة', 'معيذر', 'لوسيل'], 
+    locationsEn: ['Duhail', 'Khalifa Stadium', 'Mueather', 'Lusail'],
+    deliveryPlatforms: [
+      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/charger', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/charger', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
+      { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: 'https://www.gorafeeq.com/en/shop/charger', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
+    ]
+  },
+  { 
+    id: 2, 
+    name: 'Paws', 
+    arabicName: 'باوز', 
+    category: 'sweets', 
+    handle: '@pawsqa', 
+    logo: '/logos/paws.png', 
+    typeAr: 'حلويات وآيس كريم', 
+    typeEn: 'Sweets & Ice Cream', 
+    locationsAr: ['نادي الدحيل', 'الخريطيات' , 'ابوهامور', 'الريان','الوكره','الشحانيه','كتارا'], 
+    locationsEn: ['Duhail Club', 'Al Kharaitiyat', 'Abu Hamour', 'Al Rayyan', 'Al Wakra', 'Al Shahaniya', 'Katara'],
+    deliveryPlatforms: [
+      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/paws', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/paws', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
+      { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: 'https://www.gorafeeq.com/en/shop/paws', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
+    ]
+  },
+  { 
+    id: 3, 
+    name: 'Marcheese', 
+    arabicName: 'مارشيز', 
+    category: 'fastfood', 
+    handle: '@marcheese.qa', 
+    logo: '/logos/marcheese.png', 
+    typeAr: 'مطعم برجر', 
+    typeEn: 'Burger Spot', 
+    locationsAr: ['العزيزية', 'الدحيل', 'الوكره'], 
+    locationsEn: ['Al Aziziya', 'Al Duhail', 'Al Wakrah'],
+    deliveryPlatforms: [
+      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/marcheese', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/marcheese', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
+      { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: 'https://www.gorafeeq.com/en/shop/marcheese', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
+    ]
+  },
+  { 
+    id: 4, 
+    name: 'Cajun', 
+    arabicName: 'كيجن', 
+    category: 'fastfood', 
+    handle: '@cajun.qa', 
+    logo: '/logos/cajun.png', 
+    typeAr: 'دجاج مقرمش', 
+    typeEn: 'Crispy Chicken', 
+    locationsAr: ['سلوى', 'أم صلال', 'اسباير','الوكره'], 
+    locationsEn: ['Salwa', 'Um Salal', 'Aspire', 'Al Wakrah'],
+    deliveryPlatforms: [
+      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/cajun', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/cajun', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
+      { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: 'https://www.gorafeeq.com/en/shop/cajun', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
+    ]
+  },
+  { 
+    id: 5, 
+    name: 'Slicy', 
+    arabicName: 'سلايسي', 
+    category: 'fastfood', 
+    handle: '@slicy.qa', 
+    logo: '/logos/slicy.png', 
+    typeAr: 'بيتزا', 
+    typeEn: 'Pizza Spot', 
+    locationsAr: ['نادي قطر الرياضي','مطار حمد الدولي','ابو هامور','الوكره','اسباير','ام صلال'], 
+    locationsEn: ['Qatar SC', 'Hamad Airport', 'Abu Hamour', 'Al Wakrah', 'Aspire', 'Umm Salal'],
+    deliveryPlatforms: [
+      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/slicy', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/slicy', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
+      { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: 'https://www.gorafeeq.com/en/shop/slicy', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
+    ]
+  },
+  { 
+    id: 6, 
+    name: 'Frodz', 
+    arabicName: 'فرودز', 
+    category: 'healthy', 
+    handle: '@frodz.qatar', 
+    logo: '/logos/frodz.png', 
+    typeAr: 'أكلات صحية مجمدة', 
+    typeEn: 'Healthy Frozen Meals', 
+    locationsAr: ['توصيل منازل'], 
+    locationsEn: ['Home Delivery'],
+    deliveryPlatforms: [
+      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/frodz', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/frodz', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' }
+    ]
+  },
+  { 
+    id: 7, 
+    name: 'Bofawzi', 
+    arabicName: 'شاورما بوفوزي', 
+    category: 'fastfood', 
+    handle: '@bofawzi.qa', 
+    logo: '/logos/bofawzi.png', 
+    typeAr: 'مطعم شاورما', 
+    typeEn: 'Shawarma Spot', 
+    locationsAr: ['نادي الدحيل', 'الوكره', 'اسباير'], 
+    locationsEn: ['Duhail Club', 'Al Wakra', 'Aspire'],
+    deliveryPlatforms: [
+      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/bofawzi', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/bofawzi', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
+      { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: 'https://www.gorafeeq.com/en/shop/bofawzi', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
+    ]
+  },
+  { 
+    id: 8, 
+    name: 'Salatat', 
+    arabicName: 'سلطات', 
+    category: 'healthy', 
+    handle: '@salatat.qa', 
+    logo: '/logos/salatat.png', 
+    typeAr: 'سلطات وأكل صحي', 
+    typeEn: 'Salads & Healthy Food', 
+    locationsAr: ['نادي قطر الرياضي','اسباير','ام صلال'], 
+    locationsEn: ['Qatar SC', 'Aspire', 'Umm Salal'],
+    deliveryPlatforms: [
+      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/salatat', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/salatat', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' }
+    ]
+  },
+  { 
+    id: 9, 
+    name: 'Rashat Milh', 
+    arabicName: 'رشة ملح', 
+    category: 'breakfast', 
+    handle: '@rashat.qa', 
+    logo: '/logos/rashat.png', 
+    typeAr: 'فطور وبوكسات', 
+    typeEn: 'Breakfast & Boxes', 
+    locationsAr: ['مدينة خليفة'], 
+    locationsEn: ['Madinat Khalifa'],
+    deliveryPlatforms: [
+      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/rashat-milh', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/rashat-milh', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' }
+    ]
+  },
+  { 
+    id: 10, 
+    name: 'Baverian', 
+    arabicName: 'بافاريان', 
+    category: 'sweets', 
+    handle: '@baverian.qtr', 
+    logo: '/logos/baverian.png', 
+    typeAr: 'شوكولاتة وهدايا', 
+    typeEn: 'Chocolate & Gifts', 
+    locationsAr: ['طلب أونلاين'], 
+    locationsEn: ['Online Order'],
+    deliveryPlatforms: [
+      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/baverian', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/baverian', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' }
+    ]
+  },
+  { 
+    id: 11, 
+    name: 'Dawar Al Saada', 
+    arabicName: 'دوار السعادة', 
+    category: 'breakfast', 
+    handle: '@dawar.qa', 
+    logo: '/logos/dawar.png', 
+    typeAr: 'مطعم فطور وجلسات', 
+    typeEn: 'Breakfast & Dine-in', 
+    locationsAr: ['السد','أم صلال'], 
+    locationsEn: ['Al Sadd', 'Umm Salal'],
+    deliveryPlatforms: [
+      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/dawar-al-saada', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/dawar-al-saada', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' }
+    ]
+  },
+  { 
+    id: 12, 
+    name: 'Burgreen', 
+    arabicName: 'برجرين', 
+    category: 'fastfood', 
+    handle: '@burgreen.qa', 
+    logo: '/logos/burgreen.png', 
+    typeAr: 'برجر فاخر وجلسات', 
+    typeEn: 'Premium Burger & Dine-in', 
+    locationsAr: ['اللؤلؤة'], 
+    locationsEn: ['The Pearl'],
+    deliveryPlatforms: [
+      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/burgreen', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/burgreen', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' }
+    ]
+  },
+  { 
+    id: 13, 
+    name: 'Tick', 
+    arabicName: 'تيك', 
+    category: 'fastfood', 
+    handle: '@tick.qa', 
+    logo: '/logos/tick.png', 
+    typeAr: 'مطعم ومأكولات', 
+    typeEn: 'Restaurant & Eatery', 
+    locationsAr: ['ازغوى','الهلال'], 
+    locationsEn: ['Izghawa', 'Al Hilal'],
+    deliveryPlatforms: [
+      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/tick', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/tick', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' }
+    ]
+  },
 ];
 
 // === 2. أيقونات وسائل التواصل Social SVG Icons ===
@@ -271,7 +473,7 @@ export default function Home() {
               <p className="text-xs text-neutral-400 mt-1">{t.brandsSub}</p>
             </div>
 
-            {/* شريط البحث المضاف حديثاً */}
+            {/* شريط البحث */}
             <div className="relative w-full md:w-72">
               <Search className="absolute top-1/2 -translate-y-1/2 left-3 rtl:right-3 rtl:left-auto w-4 h-4 text-neutral-400 pointer-events-none" />
               <input
@@ -309,7 +511,7 @@ export default function Home() {
             ))}
           </div>
 
- {/* قائمة البراندات المفلترة */}
+          {/* قائمة البراندات المفلترة */}
           {filteredBrands.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {filteredBrands.map(brand => (
@@ -360,7 +562,7 @@ export default function Home() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/10">
-                    {/* زر اطلب الآن مع التحديث لفتح النافذة المنبثقة */}
+                    {/* زر اطلب الآن مع فتح المودال الجوال الحديث */}
                     <button 
                       onClick={() => setSelectedBrandForOrder(brand)}
                       className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer text-black bg-amber-400 hover:bg-amber-300"
@@ -550,67 +752,88 @@ export default function Home() {
           </div>
 
         </div>
-         </footer>
+      </footer>
 
-         
-                {/* ... كود الهيدر والبراندات والفوتر ... */}
+      {/* ==================== 4. MODAL FOR ORDER PLATFORMS (MOBILE OPTIMIZED) ==================== */}
+      {selectedBrandForOrder && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300">
+          
+          {/* خلفية الإغلاق عند النقر خارج المودال */}
+          <div 
+            className="absolute inset-0" 
+            onClick={() => setSelectedBrandForOrder(null)} 
+          />
 
-                      {/* 👈 3. أضف كود المودال هنا تماماً قبل نهاية main */}
-                      {selectedBrandForOrder && (
-                        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-                          <div className="bg-neutral-900 border border-white/10 rounded-2xl p-6 max-w-sm w-full text-center relative shadow-2xl">
-                            {/* زر الإغلاق */}
-                            <button 
-                              onClick={() => setSelectedBrandForOrder(null)}
-                              className="absolute top-4 right-4 text-neutral-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5 cursor-pointer"
-                            >
-                              ✕
-                            </button>
+          <div className="relative w-full sm:max-w-md bg-neutral-900 border-t sm:border border-white/10 rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl z-10 animate-in slide-in-from-bottom duration-300">
+            
+            {/* مقبض الجوال (Bottom Sheet Handle) */}
+            <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4 sm:hidden" />
 
-                            {/* شعار واسم البراند */}
-                            <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center p-3 mx-auto mb-3">
-                              <img src={selectedBrandForOrder.logo} alt={selectedBrandForOrder.name} className="w-full h-full object-contain" />
-                            </div>
+            {/* زر الإغلاق */}
+            <button 
+              onClick={() => setSelectedBrandForOrder(null)}
+              className="absolute top-4 left-4 rtl:left-4 rtl:right-auto sm:right-4 sm:rtl:left-auto text-neutral-400 hover:text-white transition-colors p-2 rounded-full bg-white/5 active:scale-90"
+            >
+              <X className="w-5 h-5" />
+            </button>
 
-                            <h3 className="text-xl font-bold text-white mb-1">
-                              {lang === 'ar' ? `الطلب من ${selectedBrandForOrder.arabicName}` : `Order from ${selectedBrandForOrder.name}`}
-                            </h3>
-                            <p className="text-xs text-neutral-400 mb-6">
-                              {lang === 'ar' ? 'اختر منصة التوصيل المفضلة لديك' : 'Select your preferred delivery platform'}
-                            </p>
+            {/* تفاصيل البراند المحدد */}
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-2xl bg-black border border-white/10 flex items-center justify-center p-2.5 mx-auto mb-3 shadow-lg">
+                <img 
+                  src={selectedBrandForOrder.logo} 
+                  alt={selectedBrandForOrder.name} 
+                  className="w-full h-full object-contain rounded-xl"
+                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                />
+              </div>
 
-                            {/* خيارات المنصات */}
-                            <div className="space-y-3">
-                              <a 
-                                href={`https://snoonu.com/search?q=${selectedBrandForOrder.name}`} 
-                                target="_blank" 
-                                rel="noreferrer"
-                                className="flex items-center justify-between p-3.5 rounded-xl bg-neutral-800/80 border border-white/10 hover:border-amber-400 hover:bg-neutral-800 text-white font-medium text-xs transition-all active:scale-98"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-                                  <span>سنونو (Snoonu)</span>
-                                </div>
-                                <ExternalLink className="w-4 h-4 text-amber-400" />
-                              </a>
+              <h3 className="text-lg sm:text-xl font-bold text-white">
+                {lang === 'ar' ? `الطلب من ${selectedBrandForOrder.arabicName}` : `Order from ${selectedBrandForOrder.name}`}
+              </h3>
+              <p className="text-xs text-neutral-400 mt-1">
+                {lang === 'ar' ? 'اختر منصة التوصيل المفضلة لديك' : 'Select your preferred delivery platform'}
+              </p>
+            </div>
 
-                              <a 
-                                href={`https://www.talabat.com/qatar/search?q=${selectedBrandForOrder.name}`} 
-                                target="_blank" 
-                                rel="noreferrer"
-                                className="flex items-center justify-between p-3.5 rounded-xl bg-neutral-800/80 border border-white/10 hover:border-amber-400 hover:bg-neutral-800 text-white font-medium text-xs transition-all active:scale-98"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-                                  <span>طلبات (Talabat)</span>
-                                </div>
-                                <ExternalLink className="w-4 h-4 text-amber-400" />
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+            {/* الخيارات والروابط المباشرة بالشعارات */}
+            <div className="space-y-3 mb-2">
+              {selectedBrandForOrder.deliveryPlatforms?.map((platform, idx) => (
+                <a
+                  key={idx}
+                  href={platform.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center justify-between p-3.5 rounded-2xl bg-neutral-800/60 border border-white/10 ${platform.bgColor} transition-all active:scale-98 group`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-white p-1.5 flex items-center justify-center shrink-0 shadow-sm">
+                      <img 
+                        src={platform.logo} 
+                        alt={platform.name} 
+                        className="w-full h-full object-contain"
+                        onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                      />
+                    </div>
+                    <div className="text-right rtl:text-right ltr:text-left">
+                      <span className="block text-xs font-bold text-white group-hover:text-amber-400 transition-colors">
+                        {lang === 'ar' ? platform.name : platform.nameEn}
+                      </span>
+                      <span className="text-[10px] text-neutral-400">
+                        {lang === 'ar' ? 'انتقال مباشر لصفحة المطعم' : 'Direct link to restaurant'}
+                      </span>
+                    </div>
+                  </div>
 
-                    </main>
-                  );
-                }
+                  <ExternalLink className="w-4 h-4 text-neutral-400 group-hover:text-amber-400 transition-colors" />
+                </a>
+              ))}
+            </div>
+
+          </div>
+        </div>
+      )}
+
+    </main>
+  );
+}
