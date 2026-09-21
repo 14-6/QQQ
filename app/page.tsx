@@ -71,6 +71,7 @@ export default function Home() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [selectedBrandForOrder, setSelectedBrandForOrder] = useState<typeof brandsData[0] | null>(null);
 
   const videoSources = [
     '/videos/clip1.mp4',
@@ -308,7 +309,7 @@ export default function Home() {
             ))}
           </div>
 
-          {/* قائمة البراندات المفلترة */}
+ {/* قائمة البراندات المفلترة */}
           {filteredBrands.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {filteredBrands.map(brand => (
@@ -359,7 +360,11 @@ export default function Home() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/10">
-                    <button className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer text-black bg-amber-400 hover:bg-amber-300">
+                    {/* زر اطلب الآن مع التحديث لفتح النافذة المنبثقة */}
+                    <button 
+                      onClick={() => setSelectedBrandForOrder(brand)}
+                      className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer text-black bg-amber-400 hover:bg-amber-300"
+                    >
                       <ShoppingBag className="w-3.5 h-3.5" />
                       {t.orderBtn}
                     </button>
@@ -545,8 +550,67 @@ export default function Home() {
           </div>
 
         </div>
-      </footer>
+         </footer>
 
-    </main>
-  );
-}
+         
+                {/* ... كود الهيدر والبراندات والفوتر ... */}
+
+                      {/* 👈 3. أضف كود المودال هنا تماماً قبل نهاية main */}
+                      {selectedBrandForOrder && (
+                        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+                          <div className="bg-neutral-900 border border-white/10 rounded-2xl p-6 max-w-sm w-full text-center relative shadow-2xl">
+                            {/* زر الإغلاق */}
+                            <button 
+                              onClick={() => setSelectedBrandForOrder(null)}
+                              className="absolute top-4 right-4 text-neutral-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5 cursor-pointer"
+                            >
+                              ✕
+                            </button>
+
+                            {/* شعار واسم البراند */}
+                            <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center p-3 mx-auto mb-3">
+                              <img src={selectedBrandForOrder.logo} alt={selectedBrandForOrder.name} className="w-full h-full object-contain" />
+                            </div>
+
+                            <h3 className="text-xl font-bold text-white mb-1">
+                              {lang === 'ar' ? `الطلب من ${selectedBrandForOrder.arabicName}` : `Order from ${selectedBrandForOrder.name}`}
+                            </h3>
+                            <p className="text-xs text-neutral-400 mb-6">
+                              {lang === 'ar' ? 'اختر منصة التوصيل المفضلة لديك' : 'Select your preferred delivery platform'}
+                            </p>
+
+                            {/* خيارات المنصات */}
+                            <div className="space-y-3">
+                              <a 
+                                href={`https://snoonu.com/search?q=${selectedBrandForOrder.name}`} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="flex items-center justify-between p-3.5 rounded-xl bg-neutral-800/80 border border-white/10 hover:border-amber-400 hover:bg-neutral-800 text-white font-medium text-xs transition-all active:scale-98"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                                  <span>سنونو (Snoonu)</span>
+                                </div>
+                                <ExternalLink className="w-4 h-4 text-amber-400" />
+                              </a>
+
+                              <a 
+                                href={`https://www.talabat.com/qatar/search?q=${selectedBrandForOrder.name}`} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="flex items-center justify-between p-3.5 rounded-xl bg-neutral-800/80 border border-white/10 hover:border-amber-400 hover:bg-neutral-800 text-white font-medium text-xs transition-all active:scale-98"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                                  <span>طلبات (Talabat)</span>
+                                </div>
+                                <ExternalLink className="w-4 h-4 text-amber-400" />
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                    </main>
+                  );
+                }
