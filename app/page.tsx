@@ -69,6 +69,7 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 export default function Home() {
   const [lang, setLang] = useState<'ar' | 'en'>('ar');
   const [activeFilter, setActiveFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
   const videoSources = [
@@ -93,9 +94,17 @@ export default function Home() {
     setLang(prev => (prev === 'ar' ? 'en' : 'ar'));
   };
 
-  const filteredBrands = activeFilter === 'all' 
-    ? brandsData 
-    : brandsData.filter(brand => brand.category === activeFilter);
+  // تصفية البراندات حسب الفئة وكلمة البحث
+  const filteredBrands = brandsData.filter(brand => {
+    const matchesCategory = activeFilter === 'all' || brand.category === activeFilter;
+    const query = searchQuery.toLowerCase().trim();
+    const matchesSearch = query === '' || 
+      brand.name.toLowerCase().includes(query) || 
+      brand.arabicName.toLowerCase().includes(query) || 
+      brand.handle.toLowerCase().includes(query);
+
+    return matchesCategory && matchesSearch;
+  });
 
   const content = {
     ar: {
@@ -105,7 +114,8 @@ export default function Home() {
       brandsCount: 'علامة تجارية',
       locationsLabel: 'الفروع والتواجد:',
       orderBtn: 'اطلب الآن',
-      instaBtn: 'الانستغرام',
+      searchPlaceholder: 'ابحث عن براند أو مطعم...',
+      noResults: 'لا توجد نتائج تطابق بحثك',
       filters: [
         { id: 'all', label: 'الكل' },
         { id: 'fastfood', label: 'مطاعم وبرجر' },
@@ -122,7 +132,8 @@ export default function Home() {
       brandsCount: 'Brands',
       locationsLabel: 'Locations:',
       orderBtn: 'Order Now',
-      instaBtn: 'Instagram',
+      searchPlaceholder: 'Search for a brand or restaurant...',
+      noResults: 'No brands match your search',
       filters: [
         { id: 'all', label: 'All' },
         { id: 'fastfood', label: 'Burgers & Food' },
@@ -142,10 +153,9 @@ export default function Home() {
       {/* ==================== 1. HEADER WITH VIDEO BACKGROUND ==================== */}
       <header className="relative w-full min-h-[520px] sm:min-h-[550px] lg:h-[85vh] overflow-hidden flex items-center justify-center text-white py-12 sm:py-0">
 
-        {/* الشريط العلوي الموحد والمستقيم تماماً */}
+        {/* الشريط العلوي */}
         <div className="absolute top-4 left-0 right-0 z-50 px-3 sm:px-6 max-w-7xl mx-auto flex items-center justify-between gap-2" dir="ltr">
           
-          {/* 1. زر تغيير اللغة */}
           <button
             onClick={toggleLanguage}
             className="flex items-center justify-center gap-1.5 h-9 px-3 rounded-full text-xs font-semibold border border-white/20 bg-black/60 hover:bg-black/80 text-amber-400 backdrop-blur-md transition-all duration-300 active:scale-95 shrink-0 whitespace-nowrap shadow-sm cursor-pointer"
@@ -154,12 +164,10 @@ export default function Home() {
             <span>{lang === 'ar' ? 'English' : 'عربي'}</span>
           </button>
 
-          {/* 2. شعار QQQ في المنتصف تماماً */}
           <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border border-amber-400/60 bg-black/60 backdrop-blur-md flex items-center justify-center shadow-lg hover:scale-105 transition-transform duration-300 shrink-0">
             <span className="text-xs sm:text-sm font-black tracking-widest text-amber-400">QQQ</span>
           </div>
 
-          {/* 3. زر حجز الإعلان */}
           <div className="shrink-0 flex items-center">
             <AdBookingForm lang={lang} />
           </div>
@@ -256,98 +264,126 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-8 bg-neutral-900/60 backdrop-blur-md shadow-xl">
           
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-8 gap-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-white">{t.brandsHeading}</h2>
               <p className="text-xs text-neutral-400 mt-1">{t.brandsSub}</p>
             </div>
 
-            {/* أزرار الفئات مع خاصية التمرير الأفقي للجوال */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-none sm:flex-wrap w-full md:w-auto">
-              {t.filters.map(tab => (
+            {/* شريط البحث المضاف حديثاً */}
+            <div className="relative w-full md:w-72">
+              <Search className="absolute top-1/2 -translate-y-1/2 left-3 rtl:right-3 rtl:left-auto w-4 h-4 text-neutral-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t.searchPlaceholder}
+                className="w-full bg-neutral-800/80 border border-white/10 rounded-xl py-2 px-9 text-xs sm:text-sm text-white placeholder-neutral-400 focus:outline-none focus:border-amber-400 transition-colors"
+              />
+              {searchQuery && (
                 <button
-                  key={tab.id}
-                  onClick={() => setActiveFilter(tab.id)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs md:text-sm font-medium transition-all duration-300 active:scale-95 cursor-pointer whitespace-nowrap shrink-0 border ${
-                    activeFilter === tab.id
-                      ? 'bg-amber-400 text-black font-bold border-amber-400 shadow-lg shadow-amber-400/20'
-                      : 'bg-neutral-800 text-neutral-300 border-white/10 hover:border-white/20'
-                  }`}
+                  onClick={() => setSearchQuery('')}
+                  className="absolute top-1/2 -translate-y-1/2 right-3 rtl:left-3 rtl:right-auto text-neutral-400 hover:text-white text-xs"
                 >
-                  {tab.label}
+                  ✕
                 </button>
-              ))}
+              )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-            {filteredBrands.map(brand => (
-              <div 
-                key={brand.id} 
-                className="border border-white/10 bg-neutral-800/80 rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl flex flex-col justify-between group"
+          {/* أزرار الفئات */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-4 sm:pb-6 scrollbar-none sm:flex-wrap w-full">
+            {t.filters.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveFilter(tab.id)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs md:text-sm font-medium transition-all duration-300 active:scale-95 cursor-pointer whitespace-nowrap shrink-0 border ${
+                  activeFilter === tab.id
+                    ? 'bg-amber-400 text-black font-bold border-amber-400 shadow-lg shadow-amber-400/20'
+                    : 'bg-neutral-800 text-neutral-300 border-white/10 hover:border-white/20'
+                }`}
               >
-                <div>
-                  <div className="flex items-start justify-between mb-3 gap-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border border-white/10 bg-neutral-900 p-1 flex items-center justify-center shrink-0 overflow-hidden group-hover:border-amber-400/80 transition-colors">
-                        <img 
-                          src={brand.logo} 
-                          alt={brand.name} 
-                          className="w-full h-full object-contain rounded-lg"
-                          onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} 
-                        />
-                      </div>
-                      <div>
-                        <h3 className="text-sm sm:text-base font-bold text-white">
-                          {brand.name} {lang === 'ar' && <span className="text-[11px] font-normal text-neutral-400">({brand.arabicName})</span>}
-                        </h3>
-                        <span className="text-[11px] block text-neutral-400">{brand.handle}</span>
-                      </div>
-                    </div>
-
-                    <span className="px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold rounded-full border border-white/10 bg-white/5 text-amber-400 shrink-0">
-                      {lang === 'ar' ? brand.typeAr : brand.typeEn}
-                    </span>
-                  </div>
-
-                  <div className="mb-4 mt-2">
-                    <div className="flex items-center gap-1 text-[11px] text-neutral-400 mb-1.5">
-                      <MapPin className="w-3 h-3 text-amber-400" />
-                      <span>{t.locationsLabel}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {(lang === 'ar' ? brand.locationsAr : brand.locationsEn).map((loc, idx) => (
-                        <span 
-                          key={idx} 
-                          className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded border border-white/10 bg-neutral-900 text-neutral-200"
-                        >
-                          {loc}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/10">
-                  <button className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer text-black bg-amber-400 hover:bg-amber-300">
-                    <ShoppingBag className="w-3.5 h-3.5" />
-                    {t.orderBtn}
-                  </button>
-                  
-                  <a 
-                    href={`https://instagram.com/${brand.handle.replace('@', '')}`}
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-medium transition-all duration-300 border border-white/10 bg-neutral-900 text-white hover:border-white/30"
-                    title="Instagram"
-                  >
-                    <InstagramIcon className="w-4 h-4 text-amber-400" />
-                  </a>
-                </div>
-
-              </div>
+                {tab.label}
+              </button>
             ))}
           </div>
+
+          {/* قائمة البراندات المفلترة */}
+          {filteredBrands.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+              {filteredBrands.map(brand => (
+                <div 
+                  key={brand.id} 
+                  className="border border-white/10 bg-neutral-800/80 rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl flex flex-col justify-between group"
+                >
+                  <div>
+                    <div className="flex items-start justify-between mb-3 gap-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border border-white/10 bg-neutral-900 p-1 flex items-center justify-center shrink-0 overflow-hidden group-hover:border-amber-400/80 transition-colors">
+                          <img 
+                            src={brand.logo} 
+                            alt={brand.name} 
+                            className="w-full h-full object-contain rounded-lg"
+                            onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} 
+                          />
+                        </div>
+                        <div>
+                          <h3 className="text-sm sm:text-base font-bold text-white">
+                            {brand.name} {lang === 'ar' && <span className="text-[11px] font-normal text-neutral-400">({brand.arabicName})</span>}
+                          </h3>
+                          <span className="text-[11px] block text-neutral-400">{brand.handle}</span>
+                        </div>
+                      </div>
+
+                      <span className="px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold rounded-full border border-white/10 bg-white/5 text-amber-400 shrink-0">
+                        {lang === 'ar' ? brand.typeAr : brand.typeEn}
+                      </span>
+                    </div>
+
+                    <div className="mb-4 mt-2">
+                      <div className="flex items-center gap-1 text-[11px] text-neutral-400 mb-1.5">
+                        <MapPin className="w-3 h-3 text-amber-400" />
+                        <span>{t.locationsLabel}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {(lang === 'ar' ? brand.locationsAr : brand.locationsEn).map((loc, idx) => (
+                          <span 
+                            key={idx} 
+                            className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded border border-white/10 bg-neutral-900 text-neutral-200"
+                          >
+                            {loc}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/10">
+                    <button className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer text-black bg-amber-400 hover:bg-amber-300">
+                      <ShoppingBag className="w-3.5 h-3.5" />
+                      {t.orderBtn}
+                    </button>
+                    
+                    <a 
+                      href={`https://instagram.com/${brand.handle.replace('@', '')}`}
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-medium transition-all duration-300 border border-white/10 bg-neutral-900 text-white hover:border-white/30"
+                      title="Instagram"
+                    >
+                      <InstagramIcon className="w-4 h-4 text-amber-400" />
+                    </a>
+                  </div>
+
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-neutral-400 border border-dashed border-white/10 rounded-2xl">
+              <Search className="w-8 h-8 mx-auto mb-2 opacity-50 text-amber-400" />
+              <p className="text-sm">{t.noResults}</p>
+            </div>
+          )}
 
         </div>
       </section>
