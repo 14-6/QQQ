@@ -127,13 +127,12 @@ export default function Home() {
     return [];
   };
 
-  // 1. جلب إعدادات الموقع site_settings وجدول البراندات brands
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
 
-        // جلب إعدادات الهيدر والفوتر من Supabase
+        // جلب إعدادات الهيدر والفوتر والروابط من Supabase
         const { data: settingsData } = await supabase
           .from('site_settings')
           .select('*')
@@ -160,7 +159,7 @@ export default function Home() {
             return {
               id: b.id,
               name: b.name_en || b.name || '',
-              arabicName: b.name_ar || b.arabicName || '',
+              arabicName: b.arabic_name || b.arabicName || b.name_ar || b.name || '',
               category: b.category || 'fastfood',
               handle: b.handle || '@brand',
               logo: b.logo || '/logos/placeholder.png',
@@ -284,6 +283,13 @@ export default function Home() {
 
   const t = content[lang];
 
+  // أخذ الروابط الديناميكية من site_settings أو الاعتماد على القيم الافتراضية
+  const instagramUrl = siteSettings?.instagram_url || 'https://instagram.com/qqq';
+  const tiktokUrl = siteSettings?.tiktok_url || 'https://tiktok.com/@qqq';
+  const twitterUrl = siteSettings?.twitter_url || 'https://x.com/qqq';
+  const youtubeUrl = siteSettings?.youtube_url || 'https://youtube.com/@qqq';
+  const emailUrl = siteSettings?.email ? `mailto:${siteSettings.email}` : 'mailto:info@qqq.qa';
+
   return (
     <main className="min-h-screen bg-[#121212] text-white font-sans overflow-x-hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
 
@@ -329,7 +335,6 @@ export default function Home() {
 
         <div className="relative z-30 text-center px-4 max-w-4xl mx-auto flex flex-col items-center justify-center pt-20 sm:pt-12">
           
-          {/* عنوان الهيدر الديناميكي */}
           <h1 className="text-2xl sm:text-4xl md:text-6xl font-black tracking-wide mb-2 text-white drop-shadow-md">
             {t.title}
           </h1>
@@ -338,7 +343,6 @@ export default function Home() {
             <Sparkles className="w-3.5 h-3.5 text-amber-400" /> A. ALGHAFRI | QQQ GROUP
           </p>
 
-          {/* وصف الهيدر الديناميكي */}
           <p className="max-w-xl text-neutral-200 text-xs sm:text-sm md:text-base leading-relaxed font-light mb-6">
             {t.subtitle}
           </p>
@@ -442,6 +446,8 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {filteredBrands.map(brand => {
                 const currentLocations = lang === 'ar' ? brand.locationsAr : brand.locationsEn;
+                // إظهار الاسم بالعربي إذا كانت اللغة عربية، وبالإنجليزي إذا كانت إنجليزية
+                const displayName = lang === 'ar' ? (brand.arabicName || brand.name) : (brand.name || brand.arabicName);
 
                 return (
                   <div 
@@ -454,14 +460,14 @@ export default function Home() {
                           <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border border-white/10 bg-neutral-900 p-1 flex items-center justify-center shrink-0 overflow-hidden group-hover:border-amber-400/80 transition-colors">
                             <img 
                               src={brand.logo} 
-                              alt={brand.name} 
+                              alt={displayName} 
                               className="w-full h-full object-contain rounded-lg"
                               onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} 
                             />
                           </div>
                           <div>
                             <h3 className="text-sm sm:text-base font-bold text-white">
-                              {brand.name} {lang === 'ar' && brand.arabicName && <span className="text-[11px] font-normal text-neutral-400">({brand.arabicName})</span>}
+                              {displayName}
                             </h3>
                             <span className="text-[11px] block text-neutral-400">{brand.handle}</span>
                           </div>
@@ -540,7 +546,7 @@ export default function Home() {
                 className="w-16 h-16 mx-auto rounded-xl border border-white/10 p-1 mb-3 object-contain bg-black shadow-md"
               />
               <h3 className="text-lg font-bold text-white">
-                {lang === 'ar' ? selectedBrandForOrder.arabicName || selectedBrandForOrder.name : selectedBrandForOrder.name}
+                {lang === 'ar' ? (selectedBrandForOrder.arabicName || selectedBrandForOrder.name) : selectedBrandForOrder.name}
               </h3>
               <p className="text-xs text-neutral-400 mt-1">{t.orderModalTitle}</p>
             </div>
@@ -606,20 +612,21 @@ export default function Home() {
                     : 'The unified investment umbrella for all our commercial brands, digital initiatives, and hospitality ventures in Qatar and the Gulf.'}
                 </p>
 
+                {/* روابط التواصل الاجتماعية المربوطة بـ Supabase */}
                 <div className="flex flex-wrap gap-2 mb-6">
-                  <a href="https://instagram.com/qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
+                  <a href={instagramUrl} target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
                     <InstagramIcon className="w-4 h-4" />
                   </a>
-                  <a href="https://tiktok.com/@qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
+                  <a href={tiktokUrl} target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
                     <TikTokIcon className="w-4 h-4" />
                   </a>
-                  <a href="https://x.com/qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
+                  <a href={twitterUrl} target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
                     <TwitterIcon className="w-4 h-4" />
                   </a>
-                  <a href="https://youtube.com/@qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-red-500 transition-colors">
+                  <a href={youtubeUrl} target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-red-500 transition-colors">
                     <YoutubeIcon className="w-4 h-4" />
                   </a>
-                  <a href="mailto:info@qqq.qa" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
+                  <a href={emailUrl} className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
                     <Mail className="w-4 h-4" />
                   </a>
                 </div>
