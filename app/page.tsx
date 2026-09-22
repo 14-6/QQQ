@@ -8,7 +8,8 @@ import {
   Globe, 
   Search,
   X,
-  Loader2
+  Loader2,
+  ExternalLink
 } from 'lucide-react';
 import AdBookingForm from './AdBookingForm';
 import { createClient } from '@supabase/supabase-js';
@@ -87,6 +88,16 @@ export default function Home() {
     '/videos/clip3.mp4',
   ];
 
+  // دالة مساعدة لتقسيم الفروع وتجميعها بشكل مصفوفة منظمة
+  const parseLocations = (input: any): string[] => {
+    if (!input) return [];
+    if (Array.isArray(input)) return input.map(s => String(s).trim()).filter(Boolean);
+    if (typeof input === 'string') {
+      return input.split(/,|،/).map(s => s.trim()).filter(Boolean);
+    }
+    return [];
+  };
+
   // جلب البراندات ديناميكيًا من Supabase
   useEffect(() => {
     async function fetchBrands() {
@@ -100,23 +111,29 @@ export default function Home() {
         if (error) {
           console.error('Error fetching brands:', error);
         } else if (data && data.length > 0) {
-          const formattedBrands: Brand[] = data.map((b) => ({
-            id: b.id,
-            name: b.name_en || b.name || '',
-            arabicName: b.name_ar || b.arabicName || '',
-            category: b.category || 'fastfood',
-            handle: b.handle || '@brand',
-            logo: b.logo || '/logos/placeholder.png',
-            typeAr: b.type_ar || b.typeAr || 'مطعم',
-            typeEn: b.type_en || b.typeEn || 'Restaurant',
-            locationsAr: Array.isArray(b.locations_ar) ? b.locations_ar : (typeof b.locations_ar === 'string' ? b.locations_ar.split(',').map((s: string) => s.trim()) : ['الدوحة']),
-            locationsEn: Array.isArray(b.locations_en) ? b.locations_en : (typeof b.locations_en === 'string' ? b.locations_en.split(',').map((s: string) => s.trim()) : ['Doha']),
-            deliveryPlatforms: [
-              { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: b.snoonu_url || '', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
-              { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: b.talabat_url || '', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
-              { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: b.rafeeq_url || '', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
-            ].filter(p => p.url)
-          }));
+          const formattedBrands: Brand[] = data.map((b) => {
+            const locAr = parseLocations(b.locations_ar || b.branches || b.locations);
+            const locEn = parseLocations(b.locations_en || b.branches_en);
+
+            return {
+              id: b.id,
+              name: b.name_en || b.name || '',
+              arabicName: b.name_ar || b.arabicName || '',
+              category: b.category || 'fastfood',
+              handle: b.handle || '@brand',
+              logo: b.logo || '/logos/placeholder.png',
+              typeAr: b.type_ar || b.typeAr || 'مطعم',
+              typeEn: b.type_en || b.typeEn || 'Restaurant',
+              locationsAr: locAr.length > 0 ? locAr : ['الدوحة'],
+              // عدم استبدال الفروع بكلمة Doha فقط عند التحويل للإنجليزية إذا كانت الفروع موجودة باللغة العربية
+              locationsEn: locEn.length > 0 ? locEn : (locAr.length > 0 ? locAr : ['Doha']),
+              deliveryPlatforms: [
+                { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: b.snoonu_url || '', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+                { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: b.talabat_url || '', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
+                { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: b.rafeeq_url || '', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
+              ].filter(p => p.url)
+            };
+          });
           setBrands(formattedBrands);
         }
       } catch (err) {
@@ -167,6 +184,11 @@ export default function Home() {
       orderBtn: 'اطلب الآن',
       searchPlaceholder: 'ابحث عن براند أو مطعم...',
       noResults: 'لا توجد نتائج تطابق بحثك',
+      orderModalTitle: 'اختر منصة التوصيل المباشرة',
+      noDeliveryAvailable: 'لا تتوفر روابط توصيل حالياً لهذا البراند.',
+      quickLinks: 'روابط سريعة',
+      contactUs: 'تواصل معنا',
+      rightsReserved: 'جميع الحقوق محفوظة.',
       filters: [
         { id: 'all', label: 'الكل' },
         { id: 'fastfood', label: 'مطاعم وبرجر' },
@@ -185,6 +207,11 @@ export default function Home() {
       orderBtn: 'Order Now',
       searchPlaceholder: 'Search for a brand or restaurant...',
       noResults: 'No brands match your search',
+      orderModalTitle: 'Choose Delivery Platform',
+      noDeliveryAvailable: 'No delivery links currently available for this brand.',
+      quickLinks: 'Quick Links',
+      contactUs: 'Contact Us',
+      rightsReserved: 'All rights reserved.',
       filters: [
         { id: 'all', label: 'All' },
         { id: 'fastfood', label: 'Burgers & Food' },
@@ -396,16 +423,17 @@ export default function Home() {
                       </span>
                     </div>
 
+                    {/* عرض الفروع والمواقع كمربعات منفصلة وموزعة */}
                     <div className="mb-4 mt-2">
                       <div className="flex items-center gap-1 text-[11px] text-neutral-400 mb-1.5">
-                        <MapPin className="w-3 h-3 text-amber-400" />
+                        <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
                         <span>{t.locationsLabel}</span>
                       </div>
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1.5">
                         {(lang === 'ar' ? brand.locationsAr : brand.locationsEn).map((loc, idx) => (
                           <span 
                             key={idx} 
-                            className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded border border-white/10 bg-neutral-900 text-neutral-200"
+                            className="text-[10px] sm:text-[11px] px-2.5 py-0.5 rounded-md border border-neutral-700/60 bg-neutral-900/90 text-neutral-300 shadow-sm"
                           >
                             {loc}
                           </span>
@@ -447,13 +475,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* مودال الطلب المباشر للمنصات */}
+      {/* مودال الطلب المباشر للمنصات (مع استعادة الشعارات الكاملة) */}
       {selectedBrandForOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="bg-neutral-900 border border-white/10 rounded-2xl p-6 max-w-sm w-full relative shadow-2xl">
             <button 
               onClick={() => setSelectedBrandForOrder(null)}
-              className="absolute top-4 right-4 text-neutral-400 hover:text-white p-1"
+              className="absolute top-4 right-4 rtl:left-4 rtl:right-auto text-neutral-400 hover:text-white p-1 rounded-lg hover:bg-neutral-800 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -461,13 +489,14 @@ export default function Home() {
               <img 
                 src={selectedBrandForOrder.logo} 
                 alt={selectedBrandForOrder.name} 
-                className="w-16 h-16 mx-auto rounded-xl border border-white/10 p-1 mb-3 object-contain bg-black"
+                className="w-16 h-16 mx-auto rounded-xl border border-white/10 p-1 mb-3 object-contain bg-black shadow-md"
               />
               <h3 className="text-lg font-bold text-white">
                 {lang === 'ar' ? selectedBrandForOrder.arabicName || selectedBrandForOrder.name : selectedBrandForOrder.name}
               </h3>
-              <p className="text-xs text-neutral-400 mt-1">اختر منصة التوصيل المباشرة</p>
+              <p className="text-xs text-neutral-400 mt-1">{t.orderModalTitle}</p>
             </div>
+            
             <div className="space-y-3">
               {selectedBrandForOrder.deliveryPlatforms && selectedBrandForOrder.deliveryPlatforms.length > 0 ? (
                 selectedBrandForOrder.deliveryPlatforms.map((platform, i) => (
@@ -476,16 +505,29 @@ export default function Home() {
                     href={platform.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-neutral-800 hover:border-amber-400 transition-all group"
+                    className={`flex items-center justify-between p-3 rounded-xl border border-white/10 bg-neutral-800/80 transition-all duration-300 ${platform.bgColor} group`}
                   >
-                    <span className="text-sm font-semibold text-white">
-                      {lang === 'ar' ? platform.name : platform.nameEn}
-                    </span>
-                    <ShoppingBag className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/10 p-1 flex items-center justify-center shrink-0">
+                        <img 
+                          src={platform.logo} 
+                          alt={platform.name} 
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            // إظهار أيقونة احتياطية في حال تعذر تحميل الشعار
+                            (e.target as HTMLElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
+                      <span className="text-sm font-semibold text-white">
+                        {lang === 'ar' ? platform.name : platform.nameEn}
+                      </span>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-amber-400 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-transform" />
                   </a>
                 ))
               ) : (
-                <p className="text-center text-xs text-neutral-500 py-4">لا تتوفر روابط توصيل حالياً لهذا البراند.</p>
+                <p className="text-center text-xs text-neutral-500 py-4">{t.noDeliveryAvailable}</p>
               )}
             </div>
           </div>
@@ -498,8 +540,10 @@ export default function Home() {
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 pb-12 border-b border-white/10">
-            <div className="lg:col-span-4 flex flex-col justify-between">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 pb-12 border-b border-white/10">
+            
+            {/* عن المجموعة */}
+            <div className="lg:col-span-5 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 rounded-full border border-amber-400 bg-neutral-900 flex items-center justify-center shadow-lg">
@@ -515,7 +559,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <p className="text-xs text-neutral-400 leading-relaxed mb-6 font-light">
+                <p className="text-xs text-neutral-400 leading-relaxed mb-6 font-light max-w-md">
                   {lang === 'ar'
                     ? 'المظلة الاستثمارية الموحدة لجميع علاماتنا التجارية والمبادرات الرقمية والترفيهية في دولة قطر والخليج.'
                     : 'The unified investment umbrella for all our commercial brands, digital initiatives, and hospitality ventures in Qatar and the Gulf.'}
@@ -534,10 +578,49 @@ export default function Home() {
                 </div>
               </div>
             </div>
+
+            {/* التنقل السريع */}
+            <div className="lg:col-span-3">
+              <h4 className="text-sm font-bold text-white mb-4 border-b border-amber-400/30 pb-2 inline-block">
+                {t.quickLinks}
+              </h4>
+              <ul className="space-y-2.5 text-xs text-neutral-400">
+                {t.filters.map(item => (
+                  <li key={item.id}>
+                    <button 
+                      onClick={() => {
+                        setActiveFilter(item.id);
+                        window.scrollTo({ top: 600, behavior: 'smooth' });
+                      }}
+                      className="hover:text-amber-400 transition-colors cursor-pointer"
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* معلومات للتواصل والسجل */}
+            <div className="lg:col-span-4">
+              <h4 className="text-sm font-bold text-white mb-4 border-b border-amber-400/30 pb-2 inline-block">
+                {t.contactUs}
+              </h4>
+              <p className="text-xs text-neutral-400 leading-relaxed mb-4">
+                {lang === 'ar' 
+                  ? 'للاستفسارات التجارية، حجز الإعلانات، والشراكات الاستثمارية يمكنك التواصل عبر منصتنا المباشرة.'
+                  : 'For commercial inquiries, ad bookings, and investment partnerships, connect with us through our portal.'}
+              </p>
+              <div className="p-3 rounded-xl bg-neutral-900 border border-white/10 text-xs text-neutral-300 flex items-center justify-between">
+                <span>Doha, State of Qatar 🇶🇦</span>
+                <span className="text-amber-400 font-semibold">QQQ Holding</span>
+              </div>
+            </div>
+
           </div>
 
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
-            <p>© {new Date().getFullYear()} QQQ Group. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} QQQ Group. {t.rightsReserved}</p>
             <p className="text-neutral-400">Doha, State of Qatar 🇶🇦</p>
           </div>
         </div>
