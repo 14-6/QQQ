@@ -136,7 +136,6 @@ export default function Home() {
     return [];
   };
 
-  
   // جلب البراندات ديناميكيًا من Supabase
   useEffect(() => {
     async function fetchBrands() {
@@ -171,7 +170,7 @@ export default function Home() {
               typeAr: b.type_ar || b.typeAr || 'مطعم',
               typeEn: b.type_en || b.typeEn || 'Restaurant',
               locationsAr: finalLocAr,
-              locationsEn: finalLocEn, // هنا نضمن عدم إرسال مصفوفة فارغة
+              locationsEn: finalLocEn,
               deliveryPlatforms: [
                 { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: b.snoonu_url || '', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
                 { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: b.talabat_url || '', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
@@ -707,23 +706,23 @@ export default function Home() {
                   className="w-full bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors"
                 />
                 <textarea 
-                  rows={3}
                   required
+                  rows={3}
                   placeholder={t.detailsPlaceholder}
                   value={contactForm.message}
                   onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
                   className="w-full bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors resize-none"
                 />
-                <button 
+                <button
                   type="submit"
                   disabled={isSendingMessage}
-                  className="w-full py-2.5 bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all duration-300 active:scale-95 disabled:opacity-50 cursor-pointer"
+                  className="w-full bg-amber-400 hover:bg-amber-300 text-black font-bold py-2.5 px-4 rounded-xl text-xs transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   {isSendingMessage ? (
                     <Loader2 className="w-4 h-4 animate-spin text-black" />
                   ) : (
                     <>
-                      <Send className="w-3.5 h-3.5 rtl:rotate-180" />
+                      <Send className="w-3.5 h-3.5" />
                       <span>{t.sendBtn}</span>
                     </>
                   )}
@@ -733,12 +732,14 @@ export default function Home() {
 
           </div>
 
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
+          {/* حقوق النشر */}
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-neutral-500 gap-3">
             <p>© {new Date().getFullYear()} QQQ Group. {t.rightsReserved}</p>
-            <p className="text-neutral-400">Doha, State of Qatar 🇶🇦</p>
+            <p className="text-neutral-600">Designed & Developed for QQQ Brands</p>
           </div>
         </div>
       </footer>
+
     </main>
   );
 }
