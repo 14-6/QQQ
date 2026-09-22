@@ -3,240 +3,50 @@
 import React, { useState, useEffect } from 'react';
 import {  
   ShoppingBag, 
-  ExternalLink, 
   MapPin, 
   Sparkles, 
   Globe, 
-  Mail,
   Search,
-  X 
+  X,
+  Loader2
 } from 'lucide-react';
 import AdBookingForm from './AdBookingForm';
+import { createClient } from '@supabase/supabase-js';
 
-// === 1. بيانات البراندات المحدثة مع منصات التوصيل وروابطها والشعارات ===
-const brandsData = [
-  { 
-    id: 1, 
-    name: 'Charger', 
-    arabicName: 'تشارجر', 
-    category: 'cafe', 
-    handle: '@charger.qa', 
-    logo: '/logos/charger.png', 
-    typeAr: 'كافيه ومشروبات', 
-    typeEn: 'Cafe & Drinks', 
-    locationsAr: ['الدحيل', 'استاد خليفة', 'معيذر', 'لوسيل'], 
-    locationsEn: ['Duhail', 'Khalifa Stadium', 'Mueather', 'Lusail'],
-    deliveryPlatforms: [
-      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/charger', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
-      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/charger', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
-      { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: 'https://www.gorafeeq.com/en/shop/charger', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
-    ]
-  },
-  { 
-    id: 2, 
-    name: 'Paws', 
-    arabicName: 'باوز', 
-    category: 'sweets', 
-    handle: '@pawsqa', 
-    logo: '/logos/paws.png', 
-    typeAr: 'حلويات وآيس كريم', 
-    typeEn: 'Sweets & Ice Cream', 
-    locationsAr: ['نادي الدحيل', 'الخريطيات' , 'ابوهامور', 'الريان','الوكره','الشحانيه','كتارا'], 
-    locationsEn: ['Duhail Club', 'Al Kharaitiyat', 'Abu Hamour', 'Al Rayyan', 'Al Wakra', 'Al Shahaniya', 'Katara'],
-    deliveryPlatforms: [
-      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/paws', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
-      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/paws', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
-      { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: 'https://www.gorafeeq.com/en/shop/paws', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
-    ]
-  },
-  { 
-    id: 3, 
-    name: 'Marcheese', 
-    arabicName: 'مارشيز', 
-    category: 'fastfood', 
-    handle: '@marcheese.qa', 
-    logo: '/logos/marcheese.png', 
-    typeAr: 'مطعم برجر', 
-    typeEn: 'Burger Spot', 
-    locationsAr: ['العزيزية', 'الدحيل', 'الوكره'], 
-    locationsEn: ['Al Aziziya', 'Al Duhail', 'Al Wakrah'],
-    deliveryPlatforms: [
-      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/marcheese', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
-      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/marcheese', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
-      { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: 'https://www.gorafeeq.com/en/shop/marcheese', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
-    ]
-  },
-  { 
-    id: 4, 
-    name: 'Cajun', 
-    arabicName: 'كيجن', 
-    category: 'fastfood', 
-    handle: '@cajun.qa', 
-    logo: '/logos/cajun.png', 
-    typeAr: 'دجاج مقرمش', 
-    typeEn: 'Crispy Chicken', 
-    locationsAr: ['سلوى', 'أم صلال', 'اسباير','الوكره'], 
-    locationsEn: ['Salwa', 'Um Salal', 'Aspire', 'Al Wakrah'],
-    deliveryPlatforms: [
-      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/cajun', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
-      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/cajun', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
-      { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: 'https://www.gorafeeq.com/en/shop/cajun', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
-    ]
-  },
-  { 
-    id: 5, 
-    name: 'Slicy', 
-    arabicName: 'سلايسي', 
-    category: 'fastfood', 
-    handle: '@slicy.qa', 
-    logo: '/logos/slicy.png', 
-    typeAr: 'بيتزا', 
-    typeEn: 'Pizza Spot', 
-    locationsAr: ['نادي قطر الرياضي','مطار حمد الدولي','ابو هامور','الوكره','اسباير','ام صلال'], 
-    locationsEn: ['Qatar SC', 'Hamad Airport', 'Abu Hamour', 'Al Wakrah', 'Aspire', 'Umm Salal'],
-    deliveryPlatforms: [
-      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/slicy', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
-      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/slicy', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
-      { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: 'https://www.gorafeeq.com/en/shop/slicy', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
-    ]
-  },
-  { 
-    id: 6, 
-    name: 'Frodz', 
-    arabicName: 'فرودز', 
-    category: 'healthy', 
-    handle: '@frodz.qatar', 
-    logo: '/logos/frodz.png', 
-    typeAr: 'أكلات صحية مجمدة', 
-    typeEn: 'Healthy Frozen Meals', 
-    locationsAr: ['توصيل منازل'], 
-    locationsEn: ['Home Delivery'],
-    deliveryPlatforms: [
-      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/frodz', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
-      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/frodz', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' }
-    ]
-  },
-  { 
-    id: 7, 
-    name: 'Bofawzi', 
-    arabicName: 'شاورما بوفوزي', 
-    category: 'fastfood', 
-    handle: '@bofawzi.qa', 
-    logo: '/logos/bofawzi.png', 
-    typeAr: 'مطعم شاورما', 
-    typeEn: 'Shawarma Spot', 
-    locationsAr: ['نادي الدحيل', 'الوكره', 'اسباير'], 
-    locationsEn: ['Duhail Club', 'Al Wakra', 'Aspire'],
-    deliveryPlatforms: [
-      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/bofawzi', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
-      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/bofawzi', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
-      { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: 'https://www.gorafeeq.com/en/shop/bofawzi', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
-    ]
-  },
-  { 
-    id: 8, 
-    name: 'Salatat', 
-    arabicName: 'سلطات', 
-    category: 'healthy', 
-    handle: '@salatat.qa', 
-    logo: '/logos/salatat.png', 
-    typeAr: 'سلطات وأكل صحي', 
-    typeEn: 'Salads & Healthy Food', 
-    locationsAr: ['نادي قطر الرياضي','اسباير','ام صلال'], 
-    locationsEn: ['Qatar SC', 'Aspire', 'Umm Salal'],
-    deliveryPlatforms: [
-      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/salatat', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
-      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/salatat', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' }
-    ]
-  },
-  { 
-    id: 9, 
-    name: 'Rashat Milh', 
-    arabicName: 'رشة ملح', 
-    category: 'breakfast', 
-    handle: '@rashat.qa', 
-    logo: '/logos/rashat.png', 
-    typeAr: 'فطور وبوكسات', 
-    typeEn: 'Breakfast & Boxes', 
-    locationsAr: ['مدينة خليفة'], 
-    locationsEn: ['Madinat Khalifa'],
-    deliveryPlatforms: [
-      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/rashat-milh', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
-      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/rashat-milh', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' }
-    ]
-  },
-  { 
-    id: 10, 
-    name: 'Baverian', 
-    arabicName: 'بافاريان', 
-    category: 'sweets', 
-    handle: '@baverian.qtr', 
-    logo: '/logos/baverian.png', 
-    typeAr: 'شوكولاتة وهدايا', 
-    typeEn: 'Chocolate & Gifts', 
-    locationsAr: ['طلب أونلاين'], 
-    locationsEn: ['Online Order'],
-    deliveryPlatforms: [
-      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/baverian', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
-      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/baverian', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' }
-    ]
-  },
-  { 
-    id: 11, 
-    name: 'Dawar Al Saada', 
-    arabicName: 'دوار السعادة', 
-    category: 'breakfast', 
-    handle: '@dawar.qa', 
-    logo: '/logos/dawar.png', 
-    typeAr: 'مطعم فطور وجلسات', 
-    typeEn: 'Breakfast & Dine-in', 
-    locationsAr: ['السد','أم صلال'], 
-    locationsEn: ['Al Sadd', 'Umm Salal'],
-    deliveryPlatforms: [
-      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/dawar-al-saada', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
-      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/dawar-al-saada', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' }
-    ]
-  },
-  { 
-    id: 12, 
-    name: 'Burgreen', 
-    arabicName: 'برجرين', 
-    category: 'fastfood', 
-    handle: '@burgreen.qa', 
-    logo: '/logos/burgreen.png', 
-    typeAr: 'برجر فاخر وجلسات', 
-    typeEn: 'Premium Burger & Dine-in', 
-    locationsAr: ['اللؤلؤة'], 
-    locationsEn: ['The Pearl'],
-    deliveryPlatforms: [
-      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/burgreen', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
-      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/burgreen', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' }
-    ]
-  },
-  { 
-    id: 13, 
-    name: 'Tick', 
-    arabicName: 'تيك', 
-    category: 'fastfood', 
-    handle: '@tick.qa', 
-    logo: '/logos/tick.png', 
-    typeAr: 'مطعم ومأكولات', 
-    typeEn: 'Restaurant & Eatery', 
-    locationsAr: ['ازغوى','الهلال'], 
-    locationsEn: ['Izghawa', 'Al Hilal'],
-    deliveryPlatforms: [
-      { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: 'https://snoonu.com/restaurant/tick', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
-      { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: 'https://www.talabat.com/qatar/tick', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' }
-    ]
-  },
-];
+// تهيئة عميل Supabase
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// === 2. أيقونات وسائل التواصل Social SVG Icons ===
+interface DeliveryPlatform {
+  name: string;
+  nameEn: string;
+  logo: string;
+  url: string;
+  bgColor: string;
+}
+
+interface Brand {
+  id: number;
+  name: string;
+  arabicName: string;
+  category: string;
+  handle: string;
+  logo: string;
+  typeAr: string;
+  typeEn: string;
+  locationsAr: string[];
+  locationsEn: string[];
+  deliveryPlatforms: DeliveryPlatform[];
+}
+
+// أيقونات وسائل التواصل Social SVG Icons
 const TikTokIcon = ({ className }: { className?: string }) => (
   <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
     <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 1 1-5.2-1.74 2.89 2.89 0 0 1 2.31-1.42V8.92a6.34 6.34 0 0 0-1-.08 6.34 6.34 0 1 0 6.34 6.34V9.28a8.16 8.16 0 0 0 4.77 1.52V7.34a4.85 4.85 0 0 1-1-.65z" />
   </svg>
 );
+
 const InstagramIcon = ({ className }: { className?: string }) => (
   <svg 
     className={className} 
@@ -261,25 +71,63 @@ const TwitterIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const WhatsAppIcon = ({ className }: { className?: string }) => (
-  <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
-    <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1zm0 0a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
-  </svg>
-);
-
 export default function Home() {
   const [lang, setLang] = useState<'ar' | 'en'>('ar');
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [selectedBrandForOrder, setSelectedBrandForOrder] = useState<typeof brandsData[0] | null>(null);
+  const [selectedBrandForOrder, setSelectedBrandForOrder] = useState<Brand | null>(null);
+
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const videoSources = [
     '/videos/clip1.mp4',
     '/videos/clip2.mp4',
     '/videos/clip3.mp4',
   ];
+
+  // جلب البراندات ديناميكيًا من Supabase
+  useEffect(() => {
+    async function fetchBrands() {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('brands')
+          .select('*')
+          .order('id', { ascending: true });
+
+        if (error) {
+          console.error('Error fetching brands:', error);
+        } else if (data && data.length > 0) {
+          const formattedBrands: Brand[] = data.map((b) => ({
+            id: b.id,
+            name: b.name_en || b.name || '',
+            arabicName: b.name_ar || b.arabicName || '',
+            category: b.category || 'fastfood',
+            handle: b.handle || '@brand',
+            logo: b.logo || '/logos/placeholder.png',
+            typeAr: b.type_ar || b.typeAr || 'مطعم',
+            typeEn: b.type_en || b.typeEn || 'Restaurant',
+            locationsAr: Array.isArray(b.locations_ar) ? b.locations_ar : (typeof b.locations_ar === 'string' ? b.locations_ar.split(',').map((s: string) => s.trim()) : ['الدوحة']),
+            locationsEn: Array.isArray(b.locations_en) ? b.locations_en : (typeof b.locations_en === 'string' ? b.locations_en.split(',').map((s: string) => s.trim()) : ['Doha']),
+            deliveryPlatforms: [
+              { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: b.snoonu_url || '', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
+              { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: b.talabat_url || '', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
+              { name: 'رفيق', nameEn: 'Rafeeq', logo: '/logos/rafeeq.png', url: b.rafeeq_url || '', bgColor: 'hover:bg-red-500/10 hover:border-red-500/40' }
+            ].filter(p => p.url)
+          }));
+          setBrands(formattedBrands);
+        }
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchBrands();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -298,7 +146,7 @@ export default function Home() {
   };
 
   // تصفية البراندات حسب الفئة وكلمة البحث
-  const filteredBrands = brandsData.filter(brand => {
+  const filteredBrands = brands.filter(brand => {
     const matchesCategory = activeFilter === 'all' || brand.category === activeFilter;
     const query = searchQuery.toLowerCase().trim();
     const matchesSearch = query === '' || 
@@ -416,7 +264,7 @@ export default function Home() {
           <div className="flex items-center justify-around w-full max-w-sm sm:max-w-lg bg-neutral-900/70 backdrop-blur-md border border-neutral-700/50 rounded-2xl p-3 sm:p-4 my-2 text-white shadow-xl">
             
             <div className="text-center px-1 sm:px-2">
-              <div className="text-xl sm:text-2xl font-bold text-amber-400">13</div>
+              <div className="text-xl sm:text-2xl font-bold text-amber-400">{brands.length || 13}</div>
               <div className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1">{t.brandsCount}</div>
             </div>
 
@@ -511,8 +359,13 @@ export default function Home() {
             ))}
           </div>
 
-          {/* قائمة البراندات المفلترة */}
-          {filteredBrands.length > 0 ? (
+          {/* حالة التحميل */}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 text-neutral-400">
+              <Loader2 className="w-8 h-8 animate-spin text-amber-400 mb-3" />
+              <p className="text-sm font-medium">جاري تحميل البيانات من السيرفر...</p>
+            </div>
+          ) : filteredBrands.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {filteredBrands.map(brand => (
                 <div 
@@ -532,7 +385,7 @@ export default function Home() {
                         </div>
                         <div>
                           <h3 className="text-sm sm:text-base font-bold text-white">
-                            {brand.name} {lang === 'ar' && <span className="text-[11px] font-normal text-neutral-400">({brand.arabicName})</span>}
+                            {brand.name} {lang === 'ar' && brand.arabicName && <span className="text-[11px] font-normal text-neutral-400">({brand.arabicName})</span>}
                           </h3>
                           <span className="text-[11px] block text-neutral-400">{brand.handle}</span>
                         </div>
@@ -562,7 +415,6 @@ export default function Home() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/10">
-                    {/* زر اطلب الآن مع فتح المودال الجوال الحديث */}
                     <button 
                       onClick={() => setSelectedBrandForOrder(brand)}
                       className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer text-black bg-amber-400 hover:bg-amber-300"
@@ -595,15 +447,58 @@ export default function Home() {
         </div>
       </section>
 
+      {/* مودال الطلب المباشر للمنصات */}
+      {selectedBrandForOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-neutral-900 border border-white/10 rounded-2xl p-6 max-w-sm w-full relative shadow-2xl">
+            <button 
+              onClick={() => setSelectedBrandForOrder(null)}
+              className="absolute top-4 right-4 text-neutral-400 hover:text-white p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="text-center mb-6">
+              <img 
+                src={selectedBrandForOrder.logo} 
+                alt={selectedBrandForOrder.name} 
+                className="w-16 h-16 mx-auto rounded-xl border border-white/10 p-1 mb-3 object-contain bg-black"
+              />
+              <h3 className="text-lg font-bold text-white">
+                {lang === 'ar' ? selectedBrandForOrder.arabicName || selectedBrandForOrder.name : selectedBrandForOrder.name}
+              </h3>
+              <p className="text-xs text-neutral-400 mt-1">اختر منصة التوصيل المباشرة</p>
+            </div>
+            <div className="space-y-3">
+              {selectedBrandForOrder.deliveryPlatforms && selectedBrandForOrder.deliveryPlatforms.length > 0 ? (
+                selectedBrandForOrder.deliveryPlatforms.map((platform, i) => (
+                  <a
+                    key={i}
+                    href={platform.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-neutral-800 hover:border-amber-400 transition-all group"
+                  >
+                    <span className="text-sm font-semibold text-white">
+                      {lang === 'ar' ? platform.name : platform.nameEn}
+                    </span>
+                    <ShoppingBag className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                  </a>
+                ))
+              ) : (
+                <p className="text-center text-xs text-neutral-500 py-4">لا تتوفر روابط توصيل حالياً لهذا البراند.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ==================== 3. COMPREHENSIVE FOOTER ==================== */}
       <footer className="w-full bg-neutral-950 text-neutral-300 pt-12 sm:pt-16 pb-8 border-t border-white/10 font-sans mt-12 sm:mt-20 relative overflow-hidden">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-          
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 pb-12 border-b border-white/10">
-            
             <div className="lg:col-span-4 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-4">
@@ -636,204 +531,17 @@ export default function Home() {
                   <a href="https://x.com/qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 hover:border-amber-400/50 transition-colors" aria-label="Twitter">
                     <TwitterIcon className="w-4 h-4" />
                   </a>
-                  <a href="https://wa.me/97431121124" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 hover:border-amber-400/50 transition-colors" aria-label="WhatsApp">
-                    <WhatsAppIcon className="w-4 h-4" />
-                  </a>
                 </div>
               </div>
-
-              <a
-                href="https://wa.me/97431121124"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold hover:bg-emerald-600/30 transition-all duration-300 w-full sm:w-fit"
-              >
-                <WhatsAppIcon className="w-4 h-4" />
-                <span>{lang === 'ar' ? 'تواصل مباشر عبر الواتساب' : 'Direct WhatsApp Contact'}</span>
-              </a>
-            </div>
-
-            <div className="lg:col-span-3">
-              <h4 className="text-sm font-bold text-white mb-4 border-b border-white/10 pb-2">
-                {lang === 'ar' ? 'المقر الرئيسي والانتشار' : 'Headquarters & Reach'}
-              </h4>
-              
-              <ul className="space-y-3 text-xs text-neutral-400 font-light">
-                <li className="flex items-start gap-2.5">
-                  <MapPin className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span>
-                    {lang === 'ar' ? 'الدوحة، دولة قطر — اللؤلؤة / لوسيل' : 'Doha, State of Qatar — The Pearl / Lusail'}
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <Mail className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span>info@qqq.qa</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <Globe className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span>{lang === 'ar' ? 'تغطية الفروع: كافة مناطق قطر' : 'Branches: Across Qatar'}</span>
-                </li>
-              </ul>
-
-              <div className="mt-6 p-3 rounded-xl bg-neutral-900/80 border border-white/5 text-[11px] text-neutral-400">
-                <span className="text-amber-400 font-semibold block mb-1">
-                  {lang === 'ar' ? 'ساعات العمل والإدارة:' : 'Working Hours:'}
-                </span>
-                {lang === 'ar' ? 'الأحد – الخميس: 9:00 صباحاً – 6:00 مساءً' : 'Sun – Thu: 9:00 AM – 6:00 PM'}
-              </div>
-            </div>
-
-            <div className="lg:col-span-2">
-              <h4 className="text-sm font-bold text-white mb-4 border-b border-white/10 pb-2">
-                {lang === 'ar' ? 'أبرز التصنيفات' : 'Categories'}
-              </h4>
-              <ul className="space-y-2.5 text-xs text-neutral-400">
-                {t.filters.filter(f => f.id !== 'all').map((filter) => (
-                  <li key={filter.id}>
-                    <button
-                      onClick={() => {
-                        setActiveFilter(filter.id);
-                        window.scrollTo({ top: 500, behavior: 'smooth' });
-                      }}
-                      className="hover:text-amber-400 transition-colors text-right cursor-pointer flex items-center gap-1.5"
-                    >
-                      <span className="text-amber-400/60">•</span>
-                      <span>{filter.label}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="lg:col-span-3">
-              <h4 className="text-sm font-bold text-white mb-4 border-b border-white/10 pb-2">
-                {lang === 'ar' ? 'استفسار أو شراكة تجارية' : 'Business Inquiry'}
-              </h4>
-              <form onSubmit={(e) => e.preventDefault()} className="space-y-2.5">
-                <input
-                  type="text"
-                  placeholder={lang === 'ar' ? 'الاسم الكامل' : 'Your Name'}
-                  className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors"
-                />
-                <input
-                  type="email"
-                  placeholder={lang === 'ar' ? 'البريد الإلكتروني أو رقم الهاتف' : 'Email or Phone'}
-                  className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors"
-                />
-                <textarea
-                  rows={2}
-                  placeholder={lang === 'ar' ? 'اكتب رسالتك أو استفسارك هنا...' : 'Your message...'}
-                  className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors resize-none"
-                />
-                <button
-                  type="submit"
-                  className="w-full py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs transition-all duration-300 cursor-pointer shadow-lg shadow-amber-400/10 active:scale-98"
-                >
-                  {lang === 'ar' ? 'إرسال الرسالة' : 'Send Message'}
-                </button>
-              </form>
-            </div>
-
-          </div>
-
-          <div className="pt-6 flex flex-col md:flex-row items-center justify-between text-[11px] text-neutral-500 gap-3">
-            <p className="tracking-wider text-center md:text-right">
-              © 2026 QQQ GROUP. {lang === 'ar' ? 'جميع الحقوق محفوظة' : 'ALL RIGHTS RESERVED.'}
-            </p>
-            <div className="flex items-center gap-4">
-              <span className="hover:text-neutral-400 transition-colors cursor-pointer">
-                {lang === 'ar' ? 'الشروط والأحكام' : 'Terms & Conditions'}
-              </span>
-              <span>•</span>
-              <span className="hover:text-neutral-400 transition-colors cursor-pointer">
-                {lang === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}
-              </span>
             </div>
           </div>
 
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
+            <p>© {new Date().getFullYear()} QQQ Group. All rights reserved.</p>
+            <p className="text-neutral-400">Doha, State of Qatar 🇶🇦</p>
+          </div>
         </div>
       </footer>
-
-      {/* ==================== 4. MODAL FOR ORDER PLATFORMS (MOBILE OPTIMIZED) ==================== */}
-      {selectedBrandForOrder && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300">
-          
-          {/* خلفية الإغلاق عند النقر خارج المودال */}
-          <div 
-            className="absolute inset-0" 
-            onClick={() => setSelectedBrandForOrder(null)} 
-          />
-
-          <div className="relative w-full sm:max-w-md bg-neutral-900 border-t sm:border border-white/10 rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl z-10 animate-in slide-in-from-bottom duration-300">
-            
-            {/* مقبض الجوال (Bottom Sheet Handle) */}
-            <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4 sm:hidden" />
-
-            {/* زر الإغلاق */}
-            <button 
-              onClick={() => setSelectedBrandForOrder(null)}
-              className="absolute top-4 left-4 rtl:left-4 rtl:right-auto sm:right-4 sm:rtl:left-auto text-neutral-400 hover:text-white transition-colors p-2 rounded-full bg-white/5 active:scale-90"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* تفاصيل البراند المحدد */}
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-2xl bg-black border border-white/10 flex items-center justify-center p-2.5 mx-auto mb-3 shadow-lg">
-                <img 
-                  src={selectedBrandForOrder.logo} 
-                  alt={selectedBrandForOrder.name} 
-                  className="w-full h-full object-contain rounded-xl"
-                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                />
-              </div>
-
-              <h3 className="text-lg sm:text-xl font-bold text-white">
-                {lang === 'ar' ? `الطلب من ${selectedBrandForOrder.arabicName}` : `Order from ${selectedBrandForOrder.name}`}
-              </h3>
-              <p className="text-xs text-neutral-400 mt-1">
-                {lang === 'ar' ? 'اختر منصة التوصيل المفضلة لديك' : 'Select your preferred delivery platform'}
-              </p>
-            </div>
-
-            {/* الخيارات والروابط المباشرة بالشعارات */}
-            <div className="space-y-3 mb-2">
-              {selectedBrandForOrder.deliveryPlatforms?.map((platform, idx) => (
-                <a
-                  key={idx}
-                  href={platform.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`flex items-center justify-between p-3.5 rounded-2xl bg-neutral-800/60 border border-white/10 ${platform.bgColor} transition-all active:scale-98 group`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-white p-1.5 flex items-center justify-center shrink-0 shadow-sm">
-                      <img 
-                        src={platform.logo} 
-                        alt={platform.name} 
-                        className="w-full h-full object-contain"
-                        onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                      />
-                    </div>
-                    <div className="text-right rtl:text-right ltr:text-left">
-                      <span className="block text-xs font-bold text-white group-hover:text-amber-400 transition-colors">
-                        {lang === 'ar' ? platform.name : platform.nameEn}
-                      </span>
-                      <span className="text-[10px] text-neutral-400">
-                        {lang === 'ar' ? 'انتقال مباشر لصفحة المطعم' : 'Direct link to restaurant'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <ExternalLink className="w-4 h-4 text-neutral-400 group-hover:text-amber-400 transition-colors" />
-                </a>
-              ))}
-            </div>
-
-          </div>
-        </div>
-      )}
-
     </main>
   );
 }
