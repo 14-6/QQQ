@@ -9,7 +9,9 @@ import {
   Search,
   X,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  Mail,
+  Send
 } from 'lucide-react';
 import AdBookingForm from './AdBookingForm';
 import { createClient } from '@supabase/supabase-js';
@@ -72,6 +74,12 @@ const TwitterIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const YoutubeIcon = ({ className }: { className?: string }) => (
+  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+  </svg>
+);
+
 export default function Home() {
   const [lang, setLang] = useState<'ar' | 'en'>('ar');
   const [activeFilter, setActiveFilter] = useState('all');
@@ -81,6 +89,10 @@ export default function Home() {
 
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // حالة نموذج التواصل بداخل الفوتر
+  const [contactForm, setContactForm] = useState({ name: '', contact: '', message: '' });
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   const videoSources = [
     '/videos/clip1.mp4',
@@ -125,7 +137,6 @@ export default function Home() {
               typeAr: b.type_ar || b.typeAr || 'مطعم',
               typeEn: b.type_en || b.typeEn || 'Restaurant',
               locationsAr: locAr.length > 0 ? locAr : ['الدوحة'],
-              // عدم استبدال الفروع بكلمة Doha فقط عند التحويل للإنجليزية إذا كانت الفروع موجودة باللغة العربية
               locationsEn: locEn.length > 0 ? locEn : (locAr.length > 0 ? locAr : ['Doha']),
               deliveryPlatforms: [
                 { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: b.snoonu_url || '', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
@@ -162,6 +173,19 @@ export default function Home() {
     setLang(prev => (prev === 'ar' ? 'en' : 'ar'));
   };
 
+  // دالة التعامل مع إرسال نموذج الفوتر
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSendingMessage(true);
+    
+    // محاكاة الإرسال (يمكنك ربطها مع Supabase أو API إيميل لاحقاً)
+    setTimeout(() => {
+      alert(lang === 'ar' ? 'تم إرسال رسالتك بنجاح! سنتواصل معك قريبًا.' : 'Your message has been sent successfully!');
+      setContactForm({ name: '', contact: '', message: '' });
+      setIsSendingMessage(false);
+    }, 800);
+  };
+
   // تصفية البراندات حسب الفئة وكلمة البحث
   const filteredBrands = brands.filter(brand => {
     const matchesCategory = activeFilter === 'all' || brand.category === activeFilter;
@@ -189,6 +213,10 @@ export default function Home() {
       quickLinks: 'روابط سريعة',
       contactUs: 'تواصل معنا',
       rightsReserved: 'جميع الحقوق محفوظة.',
+      namePlaceholder: 'الاسم الكامل',
+      contactPlaceholder: 'البريد الإلكتروني أو رقم الهاتف',
+      detailsPlaceholder: 'شرح التفاصيل أو الاستفسار...',
+      sendBtn: 'إرسال الرسالة',
       filters: [
         { id: 'all', label: 'الكل' },
         { id: 'fastfood', label: 'مطاعم وبرجر' },
@@ -212,6 +240,10 @@ export default function Home() {
       quickLinks: 'Quick Links',
       contactUs: 'Contact Us',
       rightsReserved: 'All rights reserved.',
+      namePlaceholder: 'Full Name',
+      contactPlaceholder: 'Email or Phone Number',
+      detailsPlaceholder: 'Message or Inquiry Details...',
+      sendBtn: 'Send Message',
       filters: [
         { id: 'all', label: 'All' },
         { id: 'fastfood', label: 'Burgers & Food' },
@@ -300,9 +332,7 @@ export default function Home() {
             <div className="text-center px-1 sm:px-2">
               <div className="flex items-center justify-center gap-1 text-xl sm:text-2xl font-bold">
                 <span>+2.5M</span>
-                <svg className="w-3.5 h-3.5 text-pink-500 fill-current shrink-0" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
+                <InstagramIcon className="w-3.5 h-3.5 text-pink-500 shrink-0" />
               </div>
               <div className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1">Instagram</div>
             </div>
@@ -312,9 +342,7 @@ export default function Home() {
             <div className="text-center px-1 sm:px-2">
               <div className="flex items-center justify-center gap-1 text-xl sm:text-2xl font-bold">
                 <span>+4.5M</span>
-                <svg className="w-4 h-4 text-red-600 fill-current shrink-0" viewBox="0 0 24 24">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
+                <YoutubeIcon className="w-4 h-4 text-red-600 shrink-0" />
               </div>
               <div className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1">YouTube</div>
             </div>
@@ -475,7 +503,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* مودال الطلب المباشر للمنصات (مع استعادة الشعارات الكاملة) */}
+      {/* مودال الطلب المباشر للمنصات */}
       {selectedBrandForOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="bg-neutral-900 border border-white/10 rounded-2xl p-6 max-w-sm w-full relative shadow-2xl">
@@ -514,7 +542,6 @@ export default function Home() {
                           alt={platform.name} 
                           className="w-full h-full object-contain"
                           onError={(e) => {
-                            // إظهار أيقونة احتياطية في حال تعذر تحميل الشعار
                             (e.target as HTMLElement).style.display = 'none';
                           }}
                         />
@@ -542,8 +569,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 pb-12 border-b border-white/10">
             
-            {/* عن المجموعة */}
-            <div className="lg:col-span-5 flex flex-col justify-between">
+            {/* عن المجموعة والأيقونات الاجتماعِيّة */}
+            <div className="lg:col-span-4 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 rounded-full border border-amber-400 bg-neutral-900 flex items-center justify-center shadow-lg">
@@ -565,6 +592,7 @@ export default function Home() {
                     : 'The unified investment umbrella for all our commercial brands, digital initiatives, and hospitality ventures in Qatar and the Gulf.'}
                 </p>
 
+                {/* روابط التواصل الاجتماعي محدثة كلياً مع YouTube و Mail */}
                 <div className="flex flex-wrap gap-2 mb-6">
                   <a href="https://instagram.com/qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 hover:border-amber-400/50 transition-colors" aria-label="Instagram">
                     <InstagramIcon className="w-4 h-4" />
@@ -574,6 +602,12 @@ export default function Home() {
                   </a>
                   <a href="https://x.com/qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 hover:border-amber-400/50 transition-colors" aria-label="Twitter">
                     <TwitterIcon className="w-4 h-4" />
+                  </a>
+                  <a href="https://youtube.com/@qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-red-500 hover:border-red-500/50 transition-colors" aria-label="YouTube">
+                    <YoutubeIcon className="w-4 h-4" />
+                  </a>
+                  <a href="mailto:info@qqq.qa" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 hover:border-amber-400/50 transition-colors" aria-label="Email">
+                    <Mail className="w-4 h-4" />
                   </a>
                 </div>
               </div>
@@ -601,20 +635,63 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* معلومات للتواصل والسجل */}
-            <div className="lg:col-span-4">
-              <h4 className="text-sm font-bold text-white mb-4 border-b border-amber-400/30 pb-2 inline-block">
-                {t.contactUs}
-              </h4>
+            {/* قسم تواصل معنا المحدث بـ (نموذج إرسال الرسائل + زر الإعلان) */}
+            <div className="lg:col-span-5">
+              <div className="flex items-center justify-between mb-4 border-b border-amber-400/30 pb-2">
+                <h4 className="text-sm font-bold text-white">
+                  {t.contactUs}
+                </h4>
+                {/* زر حجز إعلان في الفوتر */}
+                <AdBookingForm lang={lang} />
+              </div>
+
               <p className="text-xs text-neutral-400 leading-relaxed mb-4">
                 {lang === 'ar' 
-                  ? 'للاستفسارات التجارية، حجز الإعلانات، والشراكات الاستثمارية يمكنك التواصل عبر منصتنا المباشرة.'
-                  : 'For commercial inquiries, ad bookings, and investment partnerships, connect with us through our portal.'}
+                  ? 'للاستفسارات التجارية، حجز الإعلانات، والشراكات الاستثمارية يمكنك إرسال رسالتك مباشرة:'
+                  : 'For commercial inquiries, ad bookings, and investment partnerships, send us a message direct:'}
               </p>
-              <div className="p-3 rounded-xl bg-neutral-900 border border-white/10 text-xs text-neutral-300 flex items-center justify-between">
-                <span>Doha, State of Qatar 🇶🇦</span>
-                <span className="text-amber-400 font-semibold">QQQ Holding</span>
-              </div>
+
+              {/* نموذج إرسال الرسالة */}
+              <form onSubmit={handleSendMessage} className="space-y-2.5">
+                <input 
+                  type="text"
+                  required
+                  placeholder={t.namePlaceholder}
+                  value={contactForm.name}
+                  onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                  className="w-full bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors"
+                />
+                <input 
+                  type="text"
+                  required
+                  placeholder={t.contactPlaceholder}
+                  value={contactForm.contact}
+                  onChange={(e) => setContactForm({ ...contactForm, contact: e.target.value })}
+                  className="w-full bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors"
+                />
+                <textarea 
+                  rows={3}
+                  required
+                  placeholder={t.detailsPlaceholder}
+                  value={contactForm.message}
+                  onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                  className="w-full bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors resize-none"
+                />
+                <button 
+                  type="submit"
+                  disabled={isSendingMessage}
+                  className="w-full py-2.5 bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all duration-300 active:scale-95 disabled:opacity-50 cursor-pointer"
+                >
+                  {isSendingMessage ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-black" />
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5 rtl:rotate-180" />
+                      <span>{t.sendBtn}</span>
+                    </>
+                  )}
+                </button>
+              </form>
             </div>
 
           </div>
