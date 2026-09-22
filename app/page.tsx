@@ -136,6 +136,7 @@ export default function Home() {
     return [];
   };
 
+  
   // جلب البراندات ديناميكيًا من Supabase
   useEffect(() => {
     async function fetchBrands() {
@@ -150,13 +151,15 @@ export default function Home() {
           console.error('Error fetching brands:', error);
         } else if (data && data.length > 0) {
           const formattedBrands: Brand[] = data.map((b) => {
-            
-// ✅ الكود الجديد المعدل
+            // 1. جلب الفروع العربية
             const locAr = parseLocations(b.locations_ar || b.branches || b.locations);
-            const locEnFromDb = parseLocations(b.locations_en || b.branches_en);
+            
+            // 2. جلب الفروع الإنجليزية
+            const locEnRaw = parseLocations(b.locations_en || b.branches_en);
 
-            // إذا كانت الفروع بالإنجليزية فارغة، يتم استخدام الفروع العربية مباشرة
-            const locEn = locEnFromDb.length > 0 ? locEnFromDb : locAr;
+            // 3. تحديد الفروع النهائية (إذا كانت الإنجليزية فارغة نعتمد العربية فوراً)
+            const finalLocAr = locAr.length > 0 ? locAr : ['الدوحة'];
+            const finalLocEn = locEnRaw.length > 0 ? locEnRaw : finalLocAr;
 
             return {
               id: b.id,
@@ -167,8 +170,8 @@ export default function Home() {
               logo: b.logo || '/logos/placeholder.png',
               typeAr: b.type_ar || b.typeAr || 'مطعم',
               typeEn: b.type_en || b.typeEn || 'Restaurant',
-              locationsAr: locAr.length > 0 ? locAr : ['الدوحة'],
-              locationsEn: locEn,
+              locationsAr: finalLocAr,
+              locationsEn: finalLocEn, // هنا نضمن عدم إرسال مصفوفة فارغة
               deliveryPlatforms: [
                 { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: b.snoonu_url || '', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
                 { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: b.talabat_url || '', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
