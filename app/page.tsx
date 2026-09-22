@@ -100,13 +100,39 @@ export default function Home() {
     '/videos/clip3.mp4',
   ];
 
-  // دالة مساعدة لتقسيم الفروع وتجميعها بشكل مصفوفة منظمة
+  // دالة تحسين ومعالجة الفروع وتقسيمها إلى عناصر منفصلة بدقة
   const parseLocations = (input: any): string[] => {
     if (!input) return [];
-    if (Array.isArray(input)) return input.map(s => String(s).trim()).filter(Boolean);
-    if (typeof input === 'string') {
-      return input.split(/,|،/).map(s => s.trim()).filter(Boolean);
+    
+    // إذا كانت مصفوفة بالفعل
+    if (Array.isArray(input)) {
+      return input
+        .flatMap(item => String(item).split(/,|،/))
+        .map(s => s.replace(/[\[\]'"]/g, '').trim())
+        .filter(Boolean);
     }
+
+    // إذا كان نص عادي أو نص JSON
+    if (typeof input === 'string') {
+      try {
+        const parsed = JSON.parse(input);
+        if (Array.isArray(parsed)) {
+          return parsed
+            .flatMap(item => String(item).split(/,|،/))
+            .map(s => s.replace(/[\[\]'"]/g, '').trim())
+            .filter(Boolean);
+        }
+      } catch (e) {
+        // ليس JSON بل نص عادي بداخل فواصل
+      }
+
+      return input
+        .replace(/[\[\]'"]/g, '')
+        .split(/,|،/)
+        .map(s => s.trim())
+        .filter(Boolean);
+    }
+
     return [];
   };
 
@@ -125,7 +151,12 @@ export default function Home() {
         } else if (data && data.length > 0) {
           const formattedBrands: Brand[] = data.map((b) => {
             const locAr = parseLocations(b.locations_ar || b.branches || b.locations);
-            const locEn = parseLocations(b.locations_en || b.branches_en);
+            let locEn = parseLocations(b.locations_en || b.branches_en);
+
+            // إذا لم تتوفر فروع بالإنجليزية، يتم الاعتماد على الفروع العربية بدلاً من القفز لـ Doha مباشرةً
+            if (locEn.length === 0) {
+              locEn = locAr.length > 0 ? locAr : ['Doha'];
+            }
 
             return {
               id: b.id,
@@ -137,7 +168,7 @@ export default function Home() {
               typeAr: b.type_ar || b.typeAr || 'مطعم',
               typeEn: b.type_en || b.typeEn || 'Restaurant',
               locationsAr: locAr.length > 0 ? locAr : ['الدوحة'],
-              locationsEn: locEn.length > 0 ? locEn : (locAr.length > 0 ? locAr : ['Doha']),
+              locationsEn: locEn,
               deliveryPlatforms: [
                 { name: 'سنونو', nameEn: 'Snoonu', logo: '/logos/snoonu.png', url: b.snoonu_url || '', bgColor: 'hover:bg-amber-500/10 hover:border-amber-500/40' },
                 { name: 'طلبات', nameEn: 'Talabat', logo: '/logos/talabat.png', url: b.talabat_url || '', bgColor: 'hover:bg-orange-500/10 hover:border-orange-500/40' },
@@ -178,7 +209,6 @@ export default function Home() {
     e.preventDefault();
     setIsSendingMessage(true);
     
-    // محاكاة الإرسال (يمكنك ربطها مع Supabase أو API إيميل لاحقاً)
     setTimeout(() => {
       alert(lang === 'ar' ? 'تم إرسال رسالتك بنجاح! سنتواصل معك قريبًا.' : 'Your message has been sent successfully!');
       setContactForm({ name: '', contact: '', message: '' });
@@ -422,76 +452,80 @@ export default function Home() {
             </div>
           ) : filteredBrands.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-              {filteredBrands.map(brand => (
-                <div 
-                  key={brand.id} 
-                  className="border border-white/10 bg-neutral-800/80 rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl flex flex-col justify-between group"
-                >
-                  <div>
-                    <div className="flex items-start justify-between mb-3 gap-2">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border border-white/10 bg-neutral-900 p-1 flex items-center justify-center shrink-0 overflow-hidden group-hover:border-amber-400/80 transition-colors">
-                          <img 
-                            src={brand.logo} 
-                            alt={brand.name} 
-                            className="w-full h-full object-contain rounded-lg"
-                            onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} 
-                          />
+              {filteredBrands.map(brand => {
+                const currentLocations = lang === 'ar' ? brand.locationsAr : brand.locationsEn;
+
+                return (
+                  <div 
+                    key={brand.id} 
+                    className="border border-white/10 bg-neutral-800/80 rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl flex flex-col justify-between group"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between mb-3 gap-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border border-white/10 bg-neutral-900 p-1 flex items-center justify-center shrink-0 overflow-hidden group-hover:border-amber-400/80 transition-colors">
+                            <img 
+                              src={brand.logo} 
+                              alt={brand.name} 
+                              className="w-full h-full object-contain rounded-lg"
+                              onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} 
+                            />
+                          </div>
+                          <div>
+                            <h3 className="text-sm sm:text-base font-bold text-white">
+                              {brand.name} {lang === 'ar' && brand.arabicName && <span className="text-[11px] font-normal text-neutral-400">({brand.arabicName})</span>}
+                            </h3>
+                            <span className="text-[11px] block text-neutral-400">{brand.handle}</span>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="text-sm sm:text-base font-bold text-white">
-                            {brand.name} {lang === 'ar' && brand.arabicName && <span className="text-[11px] font-normal text-neutral-400">({brand.arabicName})</span>}
-                          </h3>
-                          <span className="text-[11px] block text-neutral-400">{brand.handle}</span>
-                        </div>
+
+                        <span className="px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold rounded-full border border-white/10 bg-white/5 text-amber-400 shrink-0">
+                          {lang === 'ar' ? brand.typeAr : brand.typeEn}
+                        </span>
                       </div>
 
-                      <span className="px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold rounded-full border border-white/10 bg-white/5 text-amber-400 shrink-0">
-                        {lang === 'ar' ? brand.typeAr : brand.typeEn}
-                      </span>
+                      {/* عرض الفروع كعناصر منفصلة بشكل واضح */}
+                      <div className="mb-4 mt-2">
+                        <div className="flex items-center gap-1 text-[11px] text-neutral-400 mb-1.5">
+                          <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
+                          <span>{t.locationsLabel}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {currentLocations.map((loc, idx) => (
+                            <span 
+                              key={idx} 
+                              className="text-[10px] sm:text-[11px] px-2.5 py-1 rounded-md border border-neutral-700/60 bg-neutral-900/90 text-neutral-300 shadow-sm font-medium"
+                            >
+                              {loc}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
-                    {/* عرض الفروع والمواقع كمربعات منفصلة وموزعة */}
-                    <div className="mb-4 mt-2">
-                      <div className="flex items-center gap-1 text-[11px] text-neutral-400 mb-1.5">
-                        <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
-                        <span>{t.locationsLabel}</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {(lang === 'ar' ? brand.locationsAr : brand.locationsEn).map((loc, idx) => (
-                          <span 
-                            key={idx} 
-                            className="text-[10px] sm:text-[11px] px-2.5 py-0.5 rounded-md border border-neutral-700/60 bg-neutral-900/90 text-neutral-300 shadow-sm"
-                          >
-                            {loc}
-                          </span>
-                        ))}
-                      </div>
+                    <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/10">
+                      <button 
+                        onClick={() => setSelectedBrandForOrder(brand)}
+                        className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer text-black bg-amber-400 hover:bg-amber-300"
+                      >
+                        <ShoppingBag className="w-3.5 h-3.5" />
+                        {t.orderBtn}
+                      </button>
+                      
+                      <a 
+                        href={`https://instagram.com/${brand.handle.replace('@', '')}`}
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-medium transition-all duration-300 border border-white/10 bg-neutral-900 text-white hover:border-white/30"
+                        title="Instagram"
+                      >
+                        <InstagramIcon className="w-4 h-4 text-amber-400" />
+                      </a>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/10">
-                    <button 
-                      onClick={() => setSelectedBrandForOrder(brand)}
-                      className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer text-black bg-amber-400 hover:bg-amber-300"
-                    >
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                      {t.orderBtn}
-                    </button>
-                    
-                    <a 
-                      href={`https://instagram.com/${brand.handle.replace('@', '')}`}
-                      target="_blank" 
-                      rel="noreferrer"
-                      className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-medium transition-all duration-300 border border-white/10 bg-neutral-900 text-white hover:border-white/30"
-                      title="Instagram"
-                    >
-                      <InstagramIcon className="w-4 h-4 text-amber-400" />
-                    </a>
                   </div>
-
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12 text-neutral-400 border border-dashed border-white/10 rounded-2xl">
@@ -592,7 +626,7 @@ export default function Home() {
                     : 'The unified investment umbrella for all our commercial brands, digital initiatives, and hospitality ventures in Qatar and the Gulf.'}
                 </p>
 
-                {/* روابط التواصل الاجتماعي محدثة كلياً مع YouTube و Mail */}
+                {/* روابط التواصل الاجتماعي */}
                 <div className="flex flex-wrap gap-2 mb-6">
                   <a href="https://instagram.com/qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 hover:border-amber-400/50 transition-colors" aria-label="Instagram">
                     <InstagramIcon className="w-4 h-4" />
