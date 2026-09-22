@@ -198,6 +198,7 @@ export default function AdminPanel() {
           </button>
         </div>
 
+        
         {/* ⚙️ قسم إعدادات الهيدر والفوتر والفيديو */}
         <div className="bg-neutral-900 border border-amber-500/20 rounded-2xl p-6 shadow-xl space-y-5">
           <div className="flex items-center gap-2 text-amber-400 border-b border-white/5 pb-3">
@@ -206,13 +207,15 @@ export default function AdminPanel() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            {/* الهيدر */}
             <div className="md:col-span-2">
               <label className="text-[11px] text-neutral-400 block mb-1">رابط فيديو الهيدر (Header Video URL)</label>
               <input
                 type="text"
                 value={settings.header_video_url || ''}
                 onChange={(e) => setSettings({ ...settings, header_video_url: e.target.value })}
-                placeholder="/videos/clip1.mp4"
+                placeholder="videos/clip1.mp4"
                 className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
               />
             </div>
@@ -257,8 +260,9 @@ export default function AdminPanel() {
               />
             </div>
 
+            {/* الفوتر وحقوق النشر */}
             <div>
-              <label className="text-[11px] text-neutral-400 block mb-1">نص الفوتر (عربي)</label>
+              <label className="text-[11px] text-neutral-400 block mb-1">نص الفوتر وحقوق النشر (عربي)</label>
               <input
                 type="text"
                 value={settings.footer_text_ar || ''}
@@ -268,7 +272,7 @@ export default function AdminPanel() {
             </div>
 
             <div>
-              <label className="text-[11px] text-neutral-400 block mb-1">Footer Text (English)</label>
+              <label className="text-[11px] text-neutral-400 block mb-1">Footer Text & Copyright (English)</label>
               <input
                 type="text"
                 value={settings.footer_text_en || ''}
@@ -276,6 +280,54 @@ export default function AdminPanel() {
                 className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
               />
             </div>
+
+            {/* روابط التواصل الاجتماعي والفوتر */}
+            <div className="md:col-span-2 border-t border-white/5 pt-3 mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div>
+                <label className="text-[11px] text-amber-400 block mb-1">رابط إنستغرام (Instagram)</label>
+                <input
+                  type="url"
+                  placeholder="https://instagram.com/..."
+                  value={(settings as any).instagram_url || ''}
+                  onChange={(e) => setSettings({ ...settings, instagram_url: e.target.value } as any)}
+                  className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] text-yellow-400 block mb-1">رابط سناب شات (Snapchat)</label>
+                <input
+                  type="url"
+                  placeholder="https://snapchat.com/add/..."
+                  value={(settings as any).snapchat_url || ''}
+                  onChange={(e) => setSettings({ ...settings, snapchat_url: e.target.value } as any)}
+                  className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] text-cyan-400 block mb-1">رابط تيك توك (TikTok)</label>
+                <input
+                  type="url"
+                  placeholder="https://tiktok.com/@..."
+                  value={(settings as any).tiktok_url || ''}
+                  onChange={(e) => setSettings({ ...settings, tiktok_url: e.target.value } as any)}
+                  className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] text-sky-400 block mb-1">البريد الإلكتروني للظهور في الفوتر</label>
+                <input
+                  type="email"
+                  placeholder="info@qqq.qa"
+                  value={(settings as any).email_address || ''}
+                  onChange={(e) => setSettings({ ...settings, email_address: e.target.value } as any)}
+                  className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+                />
+              </div>
+            </div>
+
           </div>
 
           <div className="flex justify-end pt-2">
@@ -285,7 +337,7 @@ export default function AdminPanel() {
               className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-amber-400 text-black font-bold text-xs hover:bg-amber-300 transition-colors cursor-pointer"
             >
               <Save className="w-4 h-4" />
-              <span>{savingSettings ? 'جاري الحفظ...' : 'حفظ إعدادات الموقع'}</span>
+              <span>{savingSettings ? 'جاري الحفظ...' : 'حفظ إعدادات الموقع بالكامل'}</span>
             </button>
           </div>
         </div>
