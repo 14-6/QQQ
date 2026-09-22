@@ -1,5 +1,4 @@
 'use client';
-export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react';
 import {  
@@ -44,13 +43,6 @@ interface Brand {
   deliveryPlatforms: DeliveryPlatform[];
 }
 
-// أيقونات وسائل التواصل Social SVG Icons
-const TikTokIcon = ({ className }: { className?: string }) => (
-  <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 1 1-5.2-1.74 2.89 2.89 0 0 1 2.31-1.42V8.92a6.34 6.34 0 0 0-1-.08 6.34 6.34 0 1 0 6.34 6.34V9.28a8.16 8.16 0 0 0 4.77 1.52V7.34a4.85 4.85 0 0 1-1-.65z" />
-  </svg>
-);
-
 const InstagramIcon = ({ className }: { className?: string }) => (
   <svg 
     className={className} 
@@ -66,6 +58,12 @@ const InstagramIcon = ({ className }: { className?: string }) => (
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
     <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
     <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+  </svg>
+);
+
+const TikTokIcon = ({ className }: { className?: string }) => (
+  <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 1 1-5.2-1.74 2.89 2.89 0 0 1 2.31-1.42V8.92a6.34 6.34 0 0 0-1-.08 6.34 6.34 0 1 0 6.34 6.34V9.28a8.16 8.16 0 0 0 4.77 1.52V7.34a4.85 4.85 0 0 1-1-.65z" />
   </svg>
 );
 
@@ -89,9 +87,9 @@ export default function Home() {
   const [selectedBrandForOrder, setSelectedBrandForOrder] = useState<Brand | null>(null);
 
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [siteSettings, setSiteSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // حالة نموذج التواصل بداخل الفوتر
   const [contactForm, setContactForm] = useState({ name: '', contact: '', message: '' });
   const [isSendingMessage, setIsSendingMessage] = useState(false);
 
@@ -101,19 +99,14 @@ export default function Home() {
     '/videos/clip3.mp4',
   ];
 
-  // دالة تحسين ومعالجة الفروع وتقسيمها إلى عناصر منفصلة بدقة
   const parseLocations = (input: any): string[] => {
     if (!input) return [];
-    
-    // إذا كانت مصفوفة بالفعل
     if (Array.isArray(input)) {
       return input
         .flatMap(item => String(item).split(/,|،/))
         .map(s => s.replace(/[\[\]'"]/g, '').trim())
         .filter(Boolean);
     }
-
-    // إذا كان نص عادي أو نص JSON
     if (typeof input === 'string') {
       try {
         const parsed = JSON.parse(input);
@@ -123,9 +116,7 @@ export default function Home() {
             .map(s => s.replace(/[\[\]'"]/g, '').trim())
             .filter(Boolean);
         }
-      } catch (e) {
-        // ليس JSON بل نص عادي بداخل فواصل
-      }
+      } catch (e) {}
 
       return input
         .replace(/[\[\]'"]/g, '')
@@ -133,31 +124,36 @@ export default function Home() {
         .map(s => s.trim())
         .filter(Boolean);
     }
-
     return [];
   };
 
-  // جلب البراندات ديناميكيًا من Supabase
+  // 1. جلب إعدادات الموقع site_settings وجدول البراندات brands
   useEffect(() => {
-    async function fetchBrands() {
+    async function fetchData() {
       try {
         setLoading(true);
+
+        // جلب إعدادات الهيدر والفوتر من Supabase
+        const { data: settingsData } = await supabase
+          .from('site_settings')
+          .select('*')
+          .single();
+
+        if (settingsData) {
+          setSiteSettings(settingsData);
+        }
+
+        // جلب قائمة البراندات
         const { data, error } = await supabase
           .from('brands')
           .select('*')
           .order('id', { ascending: true });
 
-        if (error) {
-          console.error('Error fetching brands:', error);
-        } else if (data && data.length > 0) {
+        if (!error && data && data.length > 0) {
           const formattedBrands: Brand[] = data.map((b) => {
-            // 1. جلب الفروع العربية
             const locAr = parseLocations(b.locations_ar || b.branches || b.locations);
-            
-            // 2. جلب الفروع الإنجليزية
             const locEnRaw = parseLocations(b.locations_en || b.branches_en);
 
-            // 3. تحديد الفروع النهائية (إذا كانت الإنجليزية فارغة نعتمد العربية فوراً)
             const finalLocAr = locAr.length > 0 ? locAr : ['الدوحة'];
             const finalLocEn = locEnRaw.length > 0 ? locEnRaw : finalLocAr;
 
@@ -182,20 +178,19 @@ export default function Home() {
           setBrands(formattedBrands);
         }
       } catch (err) {
-        console.error('Unexpected error:', err);
+        console.error('Error fetching data:', err);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchBrands();
+    fetchData();
   }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videoSources.length);
     }, 5000);
-
     return () => clearInterval(timer);
   }, [videoSources.length]);
 
@@ -207,19 +202,16 @@ export default function Home() {
     setLang(prev => (prev === 'ar' ? 'en' : 'ar'));
   };
 
-  // دالة التعامل مع إرسال نموذج الفوتر
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSendingMessage(true);
-    
     setTimeout(() => {
-      alert(lang === 'ar' ? 'تم إرسال رسالتك بنجاح! سنتواصل معك قريبًا.' : 'Your message has been sent successfully!');
+      alert(lang === 'ar' ? 'تم إرسال رسالتك بنجاح!' : 'Your message has been sent successfully!');
       setContactForm({ name: '', contact: '', message: '' });
       setIsSendingMessage(false);
     }, 800);
   };
 
-  // تصفية البراندات حسب الفئة وكلمة البحث
   const filteredBrands = brands.filter(brand => {
     const matchesCategory = activeFilter === 'all' || brand.category === activeFilter;
     const query = searchQuery.toLowerCase().trim();
@@ -233,7 +225,8 @@ export default function Home() {
 
   const content = {
     ar: {
-      subtitle: 'المنصة الرقمية الموحدة لاستكشاف وإدارة براندات ومشاريع مجموعة QQQ في قطر.',
+      subtitle: siteSettings?.header_subtitle_ar || 'المنصة الرقمية الموحدة لاستكشاف وإدارة براندات ومشاريع مجموعة QQQ في قطر.',
+      title: siteSettings?.header_title_ar || 'عبدالله الغافري',
       brandsHeading: 'المشاريع والعلامات التجارية',
       brandsSub: 'تصفح المطاعم والكافيهات والمتاجر المباشرة',
       brandsCount: 'علامة تجارية',
@@ -260,7 +253,8 @@ export default function Home() {
       ]
     },
     en: {
-      subtitle: 'The unified digital platform to explore QQQ Group brands and ventures in Qatar.',
+      subtitle: siteSettings?.header_subtitle_en || 'The unified digital platform to explore QQQ Group brands and ventures in Qatar.',
+      title: siteSettings?.header_title_en || 'Abdulla AlGhafri',
       brandsHeading: 'Projects & Brands',
       brandsSub: 'Explore restaurants, cafes, and direct stores',
       brandsCount: 'Brands',
@@ -293,12 +287,10 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#121212] text-white font-sans overflow-x-hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
 
-      {/* ==================== 1. HEADER WITH VIDEO BACKGROUND ==================== */}
+      {/* HEADER WITH VIDEO BACKGROUND */}
       <header className="relative w-full min-h-[520px] sm:min-h-[550px] lg:h-[85vh] overflow-hidden flex items-center justify-center text-white py-12 sm:py-0">
 
-        {/* الشريط العلوي */}
         <div className="absolute top-4 left-0 right-0 z-50 px-3 sm:px-6 max-w-7xl mx-auto flex items-center justify-between gap-2" dir="ltr">
-          
           <button
             onClick={toggleLanguage}
             className="flex items-center justify-center gap-1.5 h-9 px-3 rounded-full text-xs font-semibold border border-white/20 bg-black/60 hover:bg-black/80 text-amber-400 backdrop-blur-md transition-all duration-300 active:scale-95 shrink-0 whitespace-nowrap shadow-sm cursor-pointer"
@@ -314,10 +306,8 @@ export default function Home() {
           <div className="shrink-0 flex items-center">
             <AdBookingForm lang={lang} />
           </div>
-
         </div>
 
-        {/* خلفية الفيديو */}
         <div className="absolute inset-0 w-full h-full bg-black">
           {videoSources.map((src, index) => (
             <video
@@ -337,26 +327,25 @@ export default function Home() {
 
         <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] z-20" />
 
-        {/* محتوى الهيدر الرئيسي */}
         <div className="relative z-30 text-center px-4 max-w-4xl mx-auto flex flex-col items-center justify-center pt-20 sm:pt-12">
           
+          {/* عنوان الهيدر الديناميكي */}
           <h1 className="text-2xl sm:text-4xl md:text-6xl font-black tracking-wide mb-2 text-white drop-shadow-md">
-            {lang === 'ar' ? 'عبدالله الغافري' : 'Abdulla AlGhafri'}
+            {t.title}
           </h1>
           
           <p className="text-amber-400 text-[11px] sm:text-xs md:text-sm font-semibold tracking-wider mb-3 sm:mb-4 uppercase flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" /> A. ALGHAFRI | QQQ GROUP
           </p>
 
+          {/* وصف الهيدر الديناميكي */}
           <p className="max-w-xl text-neutral-200 text-xs sm:text-sm md:text-base leading-relaxed font-light mb-6">
             {t.subtitle}
           </p>
 
-          {/* بطاقة الإحصائيات */}
           <div className="flex items-center justify-around w-full max-w-sm sm:max-w-lg bg-neutral-900/70 backdrop-blur-md border border-neutral-700/50 rounded-2xl p-3 sm:p-4 my-2 text-white shadow-xl">
-            
             <div className="text-center px-1 sm:px-2">
-              <div className="text-xl sm:text-2xl font-bold text-amber-400">{brands.length || 13}</div>
+              <div className="text-xl sm:text-2xl font-bold text-amber-400">{brands.length || 5}</div>
               <div className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1">{t.brandsCount}</div>
             </div>
 
@@ -389,7 +378,6 @@ export default function Home() {
                 className={`h-1.5 rounded-full transition-all duration-300 ${
                   idx === currentVideoIndex ? 'w-8 bg-amber-400' : 'w-2 bg-white/40'
                 }`}
-                aria-label={`Video ${idx + 1}`}
               />
             ))}
           </div>
@@ -399,7 +387,7 @@ export default function Home() {
         <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-[#121212] to-transparent z-20 pointer-events-none" />
       </header>
 
-      {/* ==================== 2. BRANDS SECTION ==================== */}
+      {/* BRANDS SECTION */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-8 bg-neutral-900/60 backdrop-blur-md shadow-xl">
           
@@ -409,7 +397,6 @@ export default function Home() {
               <p className="text-xs text-neutral-400 mt-1">{t.brandsSub}</p>
             </div>
 
-            {/* شريط البحث */}
             <div className="relative w-full md:w-72">
               <Search className="absolute top-1/2 -translate-y-1/2 left-3 rtl:right-3 rtl:left-auto w-4 h-4 text-neutral-400 pointer-events-none" />
               <input
@@ -430,7 +417,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* أزرار الفئات */}
           <div className="flex items-center gap-2 overflow-x-auto pb-4 sm:pb-6 scrollbar-none sm:flex-wrap w-full">
             {t.filters.map(tab => (
               <button
@@ -447,11 +433,10 @@ export default function Home() {
             ))}
           </div>
 
-          {/* حالة التحميل */}
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 text-neutral-400">
               <Loader2 className="w-8 h-8 animate-spin text-amber-400 mb-3" />
-              <p className="text-sm font-medium">جاري تحميل البيانات من السيرفر...</p>
+              <p className="text-sm font-medium">جاري تحميل البيانات...</p>
             </div>
           ) : filteredBrands.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
@@ -487,7 +472,6 @@ export default function Home() {
                         </span>
                       </div>
 
-                      {/* عرض الفروع كعناصر منفصلة بشكل واضح */}
                       <div className="mb-4 mt-2">
                         <div className="flex items-center gap-1 text-[11px] text-neutral-400 mb-1.5">
                           <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
@@ -520,7 +504,6 @@ export default function Home() {
                         target="_blank" 
                         rel="noreferrer"
                         className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-medium transition-all duration-300 border border-white/10 bg-neutral-900 text-white hover:border-white/30"
-                        title="Instagram"
                       >
                         <InstagramIcon className="w-4 h-4 text-amber-400" />
                       </a>
@@ -540,7 +523,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* مودال الطلب المباشر للمنصات */}
+      {/* MODAL ORDER */}
       {selectedBrandForOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="bg-neutral-900 border border-white/10 rounded-2xl p-6 max-w-sm w-full relative shadow-2xl">
@@ -578,9 +561,7 @@ export default function Home() {
                           src={platform.logo} 
                           alt={platform.name} 
                           className="w-full h-full object-contain"
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = 'none';
-                          }}
+                          onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                         />
                       </div>
                       <span className="text-sm font-semibold text-white">
@@ -598,15 +579,11 @@ export default function Home() {
         </div>
       )}
 
-      {/* ==================== 3. COMPREHENSIVE FOOTER ==================== */}
+      {/* FOOTER */}
       <footer className="w-full bg-neutral-950 text-neutral-300 pt-12 sm:pt-16 pb-8 border-t border-white/10 font-sans mt-12 sm:mt-20 relative overflow-hidden">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 pb-12 border-b border-white/10">
             
-            {/* عن المجموعة والأيقونات الاجتماعِيّة */}
             <div className="lg:col-span-4 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-4">
@@ -629,28 +606,26 @@ export default function Home() {
                     : 'The unified investment umbrella for all our commercial brands, digital initiatives, and hospitality ventures in Qatar and the Gulf.'}
                 </p>
 
-                {/* روابط التواصل الاجتماعي */}
                 <div className="flex flex-wrap gap-2 mb-6">
-                  <a href="https://instagram.com/qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 hover:border-amber-400/50 transition-colors" aria-label="Instagram">
+                  <a href="https://instagram.com/qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
                     <InstagramIcon className="w-4 h-4" />
                   </a>
-                  <a href="https://tiktok.com/@qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 hover:border-amber-400/50 transition-colors" aria-label="TikTok">
+                  <a href="https://tiktok.com/@qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
                     <TikTokIcon className="w-4 h-4" />
                   </a>
-                  <a href="https://x.com/qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 hover:border-amber-400/50 transition-colors" aria-label="Twitter">
+                  <a href="https://x.com/qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
                     <TwitterIcon className="w-4 h-4" />
                   </a>
-                  <a href="https://youtube.com/@qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-red-500 hover:border-red-500/50 transition-colors" aria-label="YouTube">
+                  <a href="https://youtube.com/@qqq" target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-red-500 transition-colors">
                     <YoutubeIcon className="w-4 h-4" />
                   </a>
-                  <a href="mailto:info@qqq.qa" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 hover:border-amber-400/50 transition-colors" aria-label="Email">
+                  <a href="mailto:info@qqq.qa" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
                     <Mail className="w-4 h-4" />
                   </a>
                 </div>
               </div>
             </div>
 
-            {/* التنقل السريع */}
             <div className="lg:col-span-3">
               <h4 className="text-sm font-bold text-white mb-4 border-b border-amber-400/30 pb-2 inline-block">
                 {t.quickLinks}
@@ -672,23 +647,14 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* قسم تواصل معنا المحدث بـ (نموذج إرسال الرسائل + زر الإعلان) */}
             <div className="lg:col-span-5">
               <div className="flex items-center justify-between mb-4 border-b border-amber-400/30 pb-2">
                 <h4 className="text-sm font-bold text-white">
                   {t.contactUs}
                 </h4>
-                {/* زر حجز إعلان في الفوتر */}
                 <AdBookingForm lang={lang} />
               </div>
 
-              <p className="text-xs text-neutral-400 leading-relaxed mb-4">
-                {lang === 'ar' 
-                  ? 'للاستفسارات التجارية، حجز الإعلانات، والشراكات الاستثمارية يمكنك إرسال رسالتك مباشرة:'
-                  : 'For commercial inquiries, ad bookings, and investment partnerships, send us a message direct:'}
-              </p>
-
-              {/* نموذج إرسال الرسالة */}
               <form onSubmit={handleSendMessage} className="space-y-2.5">
                 <input 
                   type="text"
@@ -696,7 +662,7 @@ export default function Home() {
                   placeholder={t.namePlaceholder}
                   value={contactForm.name}
                   onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                  className="w-full bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors"
+                  className="w-full bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-amber-400"
                 />
                 <input 
                   type="text"
@@ -704,7 +670,7 @@ export default function Home() {
                   placeholder={t.contactPlaceholder}
                   value={contactForm.contact}
                   onChange={(e) => setContactForm({ ...contactForm, contact: e.target.value })}
-                  className="w-full bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors"
+                  className="w-full bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-amber-400"
                 />
                 <textarea 
                   required
@@ -712,28 +678,21 @@ export default function Home() {
                   placeholder={t.detailsPlaceholder}
                   value={contactForm.message}
                   onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                  className="w-full bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors resize-none"
+                  className="w-full bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-amber-400 resize-none"
                 />
                 <button
                   type="submit"
                   disabled={isSendingMessage}
-                  className="w-full bg-amber-400 hover:bg-amber-300 text-black font-bold py-2.5 px-4 rounded-xl text-xs transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                  className="w-full bg-amber-400 hover:bg-amber-300 text-black font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  {isSendingMessage ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-black" />
-                  ) : (
-                    <>
-                      <Send className="w-3.5 h-3.5" />
-                      <span>{t.sendBtn}</span>
-                    </>
-                  )}
+                  {isSendingMessage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  <span>{t.sendBtn}</span>
                 </button>
               </form>
             </div>
 
           </div>
 
-          {/* حقوق النشر */}
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-neutral-500 gap-3">
             <p>© {new Date().getFullYear()} QQQ Group. {t.rightsReserved}</p>
             <p className="text-neutral-600">Designed & Developed for QQQ Brands</p>
