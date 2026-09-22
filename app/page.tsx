@@ -150,13 +150,13 @@ export default function Home() {
           console.error('Error fetching brands:', error);
         } else if (data && data.length > 0) {
           const formattedBrands: Brand[] = data.map((b) => {
+            
+// ✅ الكود الجديد المعدل
             const locAr = parseLocations(b.locations_ar || b.branches || b.locations);
-            let locEn = parseLocations(b.locations_en || b.branches_en);
+            const locEnFromDb = parseLocations(b.locations_en || b.branches_en);
 
-            // إذا لم تتوفر فروع بالإنجليزية، يتم الاعتماد على الفروع العربية بدلاً من القفز لـ Doha مباشرةً
-            if (locEn.length === 0) {
-              locEn = locAr.length > 0 ? locAr : ['Doha'];
-            }
+            // إذا كانت الفروع بالإنجليزية فارغة، يتم استخدام الفروع العربية مباشرة
+            const locEn = locEnFromDb.length > 0 ? locEnFromDb : locAr;
 
             return {
               id: b.id,
