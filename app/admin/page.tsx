@@ -9,7 +9,6 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-
 interface Brand {
   id?: number;
   name: string;
@@ -135,8 +134,15 @@ export default function AdminPanel() {
     const { data: requestsData } = await supabase.from('ad_requests').select('*').order('created_at', { ascending: false });
     if (requestsData) setAdRequests(requestsData);
 
-    const { data: messagesData } = await supabase.from('messages').select('*').order('created_at', { ascending: false });
-    if (messagesData) setContactMessages(messagesData);
+const { data: messagesData, error } = await supabase
+  .from('messages')
+  .select('*')
+  .order('created_at', { ascending: false });
+
+console.log("Messages Data:", messagesData);
+console.log("Supabase Error:", error);
+
+if (messagesData) setContactMessages(messagesData);
 
     setLoading(false);
     
