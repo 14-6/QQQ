@@ -292,7 +292,7 @@ export default function Home() {
   const tiktokUrl = siteSettings?.tiktok_url || '#';
   const twitterUrl = siteSettings?.twitter_url || '#';
   const youtubeUrl = siteSettings?.youtube_url || '#';
-  const emailUrl = siteSettings?.email_url ? `mailto:${siteSettings.email}` : '#';
+  const emailUrl = siteSettings?.email_url ? `mailto:${siteSettings.email_url}` : '#';
   const whatsappUrl = siteSettings?.whatsapp_url ? `https://wa.me/${siteSettings.whatsapp_url.replace(/[^0-9]/g, '')}` : '#';
   return (
     <main className="min-h-screen bg-[#121212] text-white font-sans overflow-x-hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
