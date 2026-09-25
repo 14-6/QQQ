@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface AdBookingFormProps {
   lang: 'ar' | 'en';
@@ -11,6 +12,17 @@ interface AdBookingFormProps {
 export default function AdBookingForm({ lang }: AdBookingFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // حقول النموذج
+  const [formData, setFormData] = useState({
+    full_name: '',
+    email: '',
+    whatsapp: '',
+    ad_date: '',
+    ad_time: '',
+    project_details: ''
+  });
 
   useEffect(() => {
     setMounted(true);
@@ -27,6 +39,47 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
       document.body.style.overflow = '';
     };
   }, [isOpen]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = await supabase
+      .from('ad_requests')
+      .insert([
+        {
+          full_name: formData.full_name,
+          email: formData.email,
+          whatsapp: formData.whatsapp,
+          ad_date: formData.ad_date,
+          ad_time: formData.ad_time,
+          project_details: formData.project_details,
+        },
+      ]);
+
+    setLoading(false);
+
+    if (error) {
+      console.error('Error inserting data:', error.message);
+      alert(lang === 'ar' ? 'حدث خطأ أثناء إرسال الطلب، يرجى المحاولة مرة أخرى.' : 'Error submitting request, please try again.');
+    } else {
+      alert(lang === 'ar' ? 'تم إرسال طلبك بنجاح وسيتم مراجعته قريباً!' : 'Your request has been submitted successfully!');
+      // إعادة تعيين الحقول وإغلاق النافذة
+      setFormData({
+        full_name: '',
+        email: '',
+        whatsapp: '',
+        ad_date: '',
+        ad_time: '',
+        project_details: ''
+      });
+      setIsOpen(false);
+    }
+  };
 
   const modalContent = isOpen ? (
     <div 
@@ -63,13 +116,16 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
         </p>
 
         {/* النموذج */}
-        <form onSubmit={(e) => { e.preventDefault(); setIsOpen(false); }} className="space-y-3.5">
+        <form onSubmit={handleSubmit} className="space-y-3.5">
           <div>
             <label className="block text-xs font-medium text-neutral-300 mb-1">
               {lang === 'ar' ? 'الاسم / الشركة' : 'Name / Company'}
             </label>
             <input
               type="text"
+              name="full_name"
+              value={formData.full_name}
+              onChange={handleChange}
               required
               placeholder={lang === 'ar' ? 'مثال: شركة QQQ' : 'Example: QQQ Company'}
               className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-amber-400 transition-colors"
@@ -82,6 +138,9 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
             </label>
             <input
               type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               required
               placeholder="name@example.com"
               className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-amber-400 transition-colors"
@@ -94,6 +153,9 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
             </label>
             <input
               type="tel"
+              name="whatsapp"
+              value={formData.whatsapp}
+              onChange={handleChange}
               required
               placeholder="+974 5000 0000"
               className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-amber-400 transition-colors"
@@ -108,6 +170,10 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
               </label>
               <input
                 type="date"
+                name="ad_date"
+                value={formData.ad_date}
+                onChange={handleChange}
+                required
                 className="w-full h-10 px-3 rounded-xl bg-neutral-800/80 border border-neutral-700 text-white text-xs focus:outline-none focus:border-amber-400 transition-colors appearance-none [color-scheme:dark]"
               />
             </div>
@@ -117,6 +183,10 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
               </label>
               <input
                 type="time"
+                name="ad_time"
+                value={formData.ad_time}
+                onChange={handleChange}
+                required
                 className="w-full h-10 px-3 rounded-xl bg-neutral-800/80 border border-neutral-700 text-white text-xs focus:outline-none focus:border-amber-400 transition-colors appearance-none [color-scheme:dark]"
               />
             </div>
@@ -128,6 +198,10 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
             </label>
             <textarea
               rows={3}
+              name="project_details"
+              value={formData.project_details}
+              onChange={handleChange}
+              required
               placeholder={lang === 'ar' ? 'اكتب نبذة عن الإعلان...' : 'Briefly describe your ad...'}
               className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-amber-400 transition-colors resize-none"
             />
@@ -135,9 +209,12 @@ export default function AdBookingForm({ lang }: AdBookingFormProps) {
 
           <button
             type="submit"
-            className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-amber-400 text-black hover:bg-amber-300 transition-colors shadow-lg active:scale-98 cursor-pointer"
+            disabled={loading}
+            className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-amber-400 text-black hover:bg-amber-300 transition-colors shadow-lg active:scale-98 cursor-pointer disabled:opacity-50"
           >
-            {lang === 'ar' ? 'إرسال الطلب' : 'Submit Application'}
+            {loading 
+              ? (lang === 'ar' ? 'جاري الإرسال...' : 'Submitting...') 
+              : (lang === 'ar' ? 'إرسال الطلب' : 'Submit Application')}
           </button>
         </form>
 
