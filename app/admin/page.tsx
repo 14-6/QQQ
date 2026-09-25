@@ -555,7 +555,6 @@ export default function AdminPanel() {
               />
             </div>
 
-            {/* خانات وسائل التواصل للفوتر */}
             <div>
               <label className="text-[11px] text-amber-400 block mb-1">رابط إنستغرام (Instagram)</label>
               <input
@@ -716,75 +715,68 @@ export default function AdminPanel() {
                       <label className="text-[11px] text-neutral-400 block mb-1">الفروع بالعربي (افصل بفاصلة)</label>
                       <input
                         type="text"
-                        value={Array.isArray(brand.locations_ar) ? brand.locations_ar.join(', ') : brand.locations_ar || ''}
-                        onChange={(e) => handleInputChange(index, 'locations_ar', e.target.value.split(',').map(s => s.trim()))}
+                        value={Array.isArray(brand.locations_ar) ? brand.locations_ar.join('، ') : brand.locations_ar || ''}
+                        onChange={(e) => handleInputChange(index, 'locations_ar', e.target.value.split('،'))}
                         className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">الفروع بالإنجليزي (افصل بفاصلة)</label>
+                      <label className="text-[11px] text-neutral-400 block mb-1">Locations (English, comma separated)</label>
                       <input
                         type="text"
                         value={Array.isArray(brand.locations_en) ? brand.locations_en.join(', ') : brand.locations_en || ''}
-                        onChange={(e) => handleInputChange(index, 'locations_en', e.target.value.split(',').map(s => s.trim()))}
+                        onChange={(e) => handleInputChange(index, 'locations_en', e.target.value.split(','))}
                         className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
                       />
                     </div>
 
                     <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">الفئة (Category Filter)</label>
-                      <select
-                        value={brand.category || 'fastfood'}
+                      <label className="text-[11px] text-neutral-400 block mb-1">تصنيف البراند (Category)</label>
+                      <input
+                        type="text"
+                        value={brand.category || ''}
                         onChange={(e) => handleInputChange(index, 'category', e.target.value)}
-                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none"
-                      >
-                        <option value="fastfood">مطاعم وبرجر</option>
-                        <option value="cafe">كافيهات</option>
-                        <option value="sweets">حلويات</option>
-                        <option value="breakfast">فطور</option>
-                        <option value="healthy">صحي ومجمدات</option>
-                      </select>
+                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+                      />
                     </div>
-                  </div>
-                </div>
 
-                <div className="mt-5 pt-4 border-t border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="text-[11px] text-amber-400 font-medium block mb-1">رابط سنونو المباشر (Snoonu)</label>
-                    <input
-                      type="url"
-                      value={brand.snoonu_url || ''}
-                      onChange={(e) => handleInputChange(index, 'snoonu_url', e.target.value)}
-                      className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-amber-400 outline-none dir-ltr"
-                    />
-                  </div>
+                    <div>
+                      <label className="text-[11px] text-neutral-400 block mb-1">رابط سونيور (Snoonu)</label>
+                      <input
+                        type="text"
+                        value={brand.snoonu_url || ''}
+                        onChange={(e) => handleInputChange(index, 'snoonu_url', e.target.value)}
+                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="text-[11px] text-orange-400 font-medium block mb-1">رابط طلبات المباشر (Talabat)</label>
-                    <input
-                      type="url"
-                      value={brand.talabat_url || ''}
-                      onChange={(e) => handleInputChange(index, 'talabat_url', e.target.value)}
-                      className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-orange-400 outline-none dir-ltr"
-                    />
-                  </div>
+                    <div>
+                      <label className="text-[11px] text-neutral-400 block mb-1">رابط طلبات (Talabat)</label>
+                      <input
+                        type="text"
+                        value={brand.talabat_url || ''}
+                        onChange={(e) => handleInputChange(index, 'talabat_url', e.target.value)}
+                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="text-[11px] text-red-400 font-medium block mb-1">رابط رفيق المباشر (Rafeeq)</label>
-                    <input
-                      type="url"
-                      value={brand.rafeeq_url || ''}
-                      onChange={(e) => handleInputChange(index, 'rafeeq_url', e.target.value)}
-                      className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-red-400 outline-none dir-ltr"
-                    />
+                    <div>
+                      <label className="text-[11px] text-neutral-400 block mb-1">رابط رفيق (Rafeeq)</label>
+                      <input
+                        type="text"
+                        value={brand.rafeeq_url || ''}
+                        onChange={(e) => handleInputChange(index, 'rafeeq_url', e.target.value)}
+                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <div className="mt-5 flex items-center justify-end gap-2 pt-3 border-t border-white/5">
                   <button
                     onClick={() => deleteBrand(brand.id, index)}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500/10 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-colors cursor-pointer border border-red-500/20"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-bold transition-all cursor-pointer border border-red-500/20"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>حذف البراند</span>
@@ -792,7 +784,7 @@ export default function AdminPanel() {
                   <button
                     onClick={() => saveBrand(index)}
                     disabled={savingId === (brand.id || index)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 text-black text-xs font-bold hover:bg-amber-300 transition-colors cursor-pointer shadow-lg shadow-amber-400/10"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 text-black font-bold text-xs hover:bg-amber-300 transition-all cursor-pointer shadow-lg shadow-amber-400/10"
                   >
                     <Save className="w-3.5 h-3.5" />
                     <span>{savingId === (brand.id || index) ? 'جاري الحفظ...' : 'حفظ التعديلات'}</span>
