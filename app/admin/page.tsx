@@ -52,6 +52,14 @@ interface AdRequest {
   created_at: string;
 }
 
+interface ContactMessage {
+  id: number;
+  name: string;
+  contact: string;
+  message: string;
+  created_at: string;
+}
+
 export default function AdminPanel() {
   const [session, setSession] = useState<any>(null);
   const [email, setEmail] = useState('');
@@ -60,6 +68,7 @@ export default function AdminPanel() {
 
   const [brands, setBrands] = useState<Brand[]>([]);
   const [adRequests, setAdRequests] = useState<AdRequest[]>([]);
+  const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -131,6 +140,9 @@ export default function AdminPanel() {
 
     const { data: requestsData } = await supabase.from('ad_requests').select('*').order('created_at', { ascending: false });
     if (requestsData) setAdRequests(requestsData);
+
+    const { data: messagesData } = await supabase.from('messages').select('*').order('created_at', { ascending: false });
+    if (messagesData) setContactMessages(messagesData);
 
     setLoading(false);
   };
@@ -212,6 +224,16 @@ export default function AdminPanel() {
       setAdRequests(adRequests.filter(req => req.id !== id));
     } else {
       alert('حدث خطأ أثناء الحذف');
+    }
+  };
+
+  const deleteContactMessage = async (id: number) => {
+    if (!confirm('هل أنت متأكد من حذف هذه الرسالة؟')) return;
+    const { error } = await supabase.from('messages').delete().eq('id', id);
+    if (!error) {
+      setContactMessages(contactMessages.filter(msg => msg.id !== id));
+    } else {
+      alert('حدث خطأ أثناء حذف الرسالة');
     }
   };
 
@@ -307,7 +329,7 @@ export default function AdminPanel() {
               </Link>
               <h1 className="text-2xl font-bold text-white">لوحة إدارة مجموعة QQQ</h1>
             </div>
-            <p className="text-xs text-neutral-400 mr-11">إدارة البراندات، الحجوزات الإعلانية، وإعدادات الهيدر والفوتر للموقع.</p>
+            <p className="text-xs text-neutral-400 mr-11">إدارة البراندات، الحجوزات الإعلانية، رسائل اتصل بنا، وإعدادات الموقع.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -403,6 +425,68 @@ export default function AdminPanel() {
                       onClick={() => deleteAdRequest(req.id)}
                       className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
                       title="حذف الطلب"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 📬 رسائل نموذج "اتصل معنا" */}
+        <div className="bg-neutral-900 border border-cyan-500/20 rounded-2xl p-6 shadow-xl space-y-5">
+          <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <div className="flex items-center gap-2 text-cyan-400">
+              <Mail className="w-5 h-5" />
+              <h2 className="font-bold text-base text-white">رسائل "اتصل معنا" الواردة</h2>
+            </div>
+            <span className="px-3 py-1 bg-cyan-400/10 text-cyan-400 border border-cyan-400/20 rounded-full text-xs font-bold">
+              {contactMessages.length} رسائل
+            </span>
+          </div>
+
+          {contactMessages.length === 0 ? (
+            <p className="text-xs text-neutral-400 text-center py-6">لا توجد رسائل تواصل جديدة حتى الآن.</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              {contactMessages.map((msg) => (
+                <div key={msg.id} className="bg-neutral-950 border border-white/10 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <span className="font-bold text-sm text-white">{msg.name}</span>
+                      <span className="text-[10px] text-neutral-400 bg-neutral-900 px-2.5 py-1 rounded-md border border-white/5">
+                        {new Date(msg.created_at).toLocaleString('ar-QA')}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-300">
+                      <div className="flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-cyan-400" />
+                        <span className="dir-ltr">{msg.contact}</span>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-neutral-300 bg-neutral-900/60 p-3 rounded-lg border border-white/5">
+                      <span className="text-cyan-400 font-bold block mb-1">الرسالة:</span>
+                      {msg.message}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                    <a
+                      href={`mailto:${msg.contact}?subject=${encodeURIComponent('الرد على استفسارك - مجموعة QQQ')}&body=${encodeURIComponent(`مرحباً ${msg.name},\n\nشكراً لتواصلك معنا.\n\nتحياتنا،`)}`}
+                      className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition-colors"
+                    >
+                      <Mail className="w-3.5 h-3.5" />
+                      <span>رد عبر البريد</span>
+                    </a>
+
+                    <button
+                      onClick={() => deleteContactMessage(msg.id)}
+                      className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
+                      title="حذف الرسالة"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -700,19 +784,18 @@ export default function AdminPanel() {
                 <div className="mt-5 flex items-center justify-end gap-2 pt-3 border-t border-white/5">
                   <button
                     onClick={() => deleteBrand(brand.id, index)}
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs hover:bg-red-500/20 transition-colors cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500/10 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-colors cursor-pointer border border-red-500/20"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                    <span>حذف</span>
+                    <span>حذف البراند</span>
                   </button>
-
                   <button
                     onClick={() => saveBrand(index)}
                     disabled={savingId === (brand.id || index)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition-colors cursor-pointer shadow-lg shadow-emerald-500/10"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 text-black text-xs font-bold hover:bg-amber-300 transition-colors cursor-pointer shadow-lg shadow-amber-400/10"
                   >
                     <Save className="w-3.5 h-3.5" />
-                    <span>{savingId === (brand.id || index) ? 'جاري الحفظ...' : 'حفظ التغييرات'}</span>
+                    <span>{savingId === (brand.id || index) ? 'جاري الحفظ...' : 'حفظ التعديلات'}</span>
                   </button>
                 </div>
               </div>
