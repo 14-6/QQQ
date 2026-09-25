@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Save, Upload, Trash2, Plus, RefreshCw, ArrowLeft, Settings, Building2, MessageSquare, Calendar, Clock, Mail, Phone } from 'lucide-react';
+import { Save, Upload, Trash2, Plus, RefreshCw, ArrowLeft, Settings, Building2, MessageSquare, Calendar, Clock, Mail, Phone, Lock } from 'lucide-react';
 import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -36,7 +36,7 @@ interface SiteSettings {
 }
 
 interface AdRequest {
-  id: string; // تم التعديل إلى string لدعم الـ UUID
+  id: string;
   full_name: string;
   email: string;
   whatsapp: string;
@@ -47,6 +47,8 @@ interface AdRequest {
 }
 
 export default function AdminPanel() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passcode, setPasscode] = useState('');
   const [brands, setBrands] = useState<Brand[]>([]);
   const [adRequests, setAdRequests] = useState<AdRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,22 +66,36 @@ export default function AdminPanel() {
     footer_text_en: ''
   });
 
+  // التحقق هل تم تسجيل الدخول مسبقاً من المتصفح
   useEffect(() => {
+    const authStatus = localStorage.getItem('qqq_admin_auth');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+    }
     fetchData();
   }, []);
 
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // 🔐 ضع هنا كلمة المرور السرية الخاصة بك للدخول للوحة التحكم
+    const SECRET_PASSWORD = 'QQQ2026Admin!'; 
+
+    if (passcode === SECRET_PASSWORD) {
+      localStorage.setItem('qqq_admin_auth', 'true');
+      setIsAuthenticated(true);
+    } else {
+      alert('كلمة المرور غير صحيحة!');
+    }
+  };
+
   const fetchData = async () => {
     setLoading(true);
-    
-    // جلب البراندات
     const { data: brandsData } = await supabase.from('brands').select('*').order('id', { ascending: true });
     if (brandsData) setBrands(brandsData);
 
-    // جلب إعدادات الموقع
     const { data: settingsData } = await supabase.from('site_settings').select('*').eq('id', 1).single();
     if (settingsData) setSettings(settingsData);
 
-    // جلب طلبات الإعلانات
     const { data: requestsData } = await supabase.from('ad_requests').select('*').order('created_at', { ascending: false });
     if (requestsData) setAdRequests(requestsData);
 
@@ -92,7 +108,6 @@ export default function AdminPanel() {
     setBrands(updated);
   };
 
-  // رفع الصورة إلى Supabase Storage
   const handleFileUpload = async (index: number, file: File) => {
     try {
       setUploadingLogoIndex(index);
@@ -107,16 +122,14 @@ export default function AdminPanel() {
       if (uploadError) throw uploadError;
 
       const { data } = supabase.storage.from('brand-assets').getPublicUrl(filePath);
-      
       handleInputChange(index, 'logo', data.publicUrl);
     } catch (err: any) {
-      alert('خطأ في رفع الصورة: تأكد من إنشاء Bucket باسم brand-assets وتجعله Public في Supabase Storage');
+      alert('خطأ في رفع الصورة تأكد من إعدادات الـ Supabase Storage');
     } finally {
       setUploadingLogoIndex(null);
     }
   };
 
-  // حفظ براند واحد
   const saveBrand = async (index: number) => {
     const brand = brands[index];
     setSavingId(brand.id || index);
@@ -139,7 +152,6 @@ export default function AdminPanel() {
     setSavingId(null);
   };
 
-  // حفظ إعدادات الهيدر والفوتر
   const saveSettings = async () => {
     setSavingSettings(true);
     const { error } = await supabase.from('site_settings').upsert({ id: 1, ...settings });
@@ -152,7 +164,6 @@ export default function AdminPanel() {
     }
   };
 
-  // حذف براند
   const deleteBrand = async (id?: number, index?: number) => {
     if (!confirm('هل أنت تأكد من إزالة هذا البراند؟')) return;
     if (id) {
@@ -161,7 +172,6 @@ export default function AdminPanel() {
     setBrands(brands.filter((_, i) => i !== index));
   };
 
-  // حذف طلب إعلان (مع دعم الـ UUID كـ string)
   const deleteAdRequest = async (id: string) => {
     if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
     const { error } = await supabase.from('ad_requests').delete().eq('id', id);
@@ -172,7 +182,6 @@ export default function AdminPanel() {
     }
   };
 
-  // إضافة براند جديد
   const addNewBrand = () => {
     const newBrand: Brand = {
       name: 'New Brand',
@@ -190,6 +199,47 @@ export default function AdminPanel() {
     };
     setBrands([...brands, newBrand]);
   };
+
+  // 🔒 إذا لم يتم إدخال كلمة المرور، اعرض شاشة قفل حماية الأدمن
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-neutral-950 text-white flex flex-col items-center justify-center p-4 dir-rtl font-sans">
+        <div className="max-w-md w-full bg-neutral-900 border border-amber-500/30 rounded-3xl p-8 shadow-2xl space-y-6 text-center">
+          <div className="w-16 h-16 bg-amber-400/10 border border-amber-400/30 rounded-2xl flex items-center justify-center mx-auto text-amber-400">
+            <Lock className="w-8 h-8" />
+          </div>
+          
+          <div>
+            <h1 className="text-xl font-bold text-white mb-2">منطقة محمية - لوحة تحكم QQQ</h1>
+            <p className="text-xs text-neutral-400">الرجاء إدخال كلمة المرور السرية للوصول إلى لوحة التحكم.</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <input
+              type="password"
+              placeholder="أدخل كلمة المرور السرية..."
+              value={passcode}
+              onChange={(e) => setPasscode(e.target.value)}
+              className="w-full bg-neutral-950 border border-white/10 rounded-2xl px-4 py-3 text-sm text-center text-white focus:border-amber-400 outline-none transition-colors"
+              autoFocus
+            />
+            <button
+              type="submit"
+              className="w-full py-3 bg-amber-400 text-black font-bold rounded-2xl text-sm hover:bg-amber-300 transition-colors shadow-lg shadow-amber-400/10 cursor-pointer"
+            >
+              دخول لوحة التحكم
+            </button>
+          </form>
+
+          <div className="pt-2 border-t border-white/5">
+            <Link href="/" className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors">
+              ← العودة إلى الصفحة الرئيسية للموقع
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -216,17 +266,28 @@ export default function AdminPanel() {
             <p className="text-xs text-neutral-400 mr-11">إدارة البراندات، الحجوزات الإعلانية، وإعدادات الهيدر والفوتر للموقع.</p>
           </div>
 
-          <button
-            onClick={addNewBrand}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 text-black font-bold text-xs hover:bg-amber-300 transition-all cursor-pointer shadow-lg shadow-amber-400/10"
-          >
-            <Plus className="w-4 h-4" />
-            <span>إضافة براند جديد</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                localStorage.removeItem('qqq_admin_auth');
+                setIsAuthenticated(false);
+              }}
+              className="px-3 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-all cursor-pointer"
+            >
+              تسجيل خروج
+            </button>
+
+            <button
+              onClick={addNewBrand}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 text-black font-bold text-xs hover:bg-amber-300 transition-all cursor-pointer shadow-lg shadow-amber-400/10"
+            >
+              <Plus className="w-4 h-4" />
+              <span>إضافة براند جديد</span>
+            </button>
+          </div>
         </div>
 
-
-        {/* 📋 قسم طلبات حجز الإعلانات الواردة */}
+        {/* 📋 طلبات الإعلانات */}
         <div className="bg-neutral-900 border border-amber-500/20 rounded-2xl p-6 shadow-xl space-y-5">
           <div className="flex items-center justify-between border-b border-white/5 pb-3">
             <div className="flex items-center gap-2 text-amber-400">
@@ -278,7 +339,6 @@ export default function AdminPanel() {
                   </div>
 
                   <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-                    {/* زر الواتساب */}
                     <a
                       href={`https://wa.me/${req.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`مرحباً بك ${req.full_name}، بخصوص طلبك لحجز مساحة إعلانية في مجموعة QQQ...`)}`}
                       target="_blank"
@@ -289,7 +349,6 @@ export default function AdminPanel() {
                       <span>رد واتساب</span>
                     </a>
 
-                    {/* زر الإيميل */}
                     <a
                       href={`mailto:${req.email}?subject=${encodeURIComponent('بخصوص طلب حجز مساحة إعلانية - مجموعة QQQ')}&body=${encodeURIComponent(`مرحباً ${req.full_name},\n\nشكراً لتواصلك معنا بخصوص طلب إعلانك بمشروع QQQ.\n\nتحياتنا،`)}`}
                       className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition-colors"
@@ -298,7 +357,6 @@ export default function AdminPanel() {
                       <span>إرسال إيميل</span>
                     </a>
 
-                    {/* زر الحذف */}
                     <button
                       onClick={() => deleteAdRequest(req.id)}
                       className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
@@ -313,8 +371,7 @@ export default function AdminPanel() {
           )}
         </div>
 
-        
-        {/* ⚙️ قسم إعدادات الهيدر والفوتر والفيديو */}
+        {/* ⚙️ إعدادات الموقع */}
         <div className="bg-neutral-900 border border-amber-500/20 rounded-2xl p-6 shadow-xl space-y-5">
           <div className="flex items-center gap-2 text-amber-400 border-b border-white/5 pb-3">
             <Settings className="w-5 h-5" />
@@ -322,14 +379,12 @@ export default function AdminPanel() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
             <div className="md:col-span-2">
               <label className="text-[11px] text-neutral-400 block mb-1">رابط فيديو الهيدر (Header Video URL)</label>
               <input
                 type="text"
                 value={settings.header_video_url || ''}
                 onChange={(e) => setSettings({ ...settings, header_video_url: e.target.value })}
-                placeholder="videos/clip1.mp4"
                 className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
               />
             </div>
@@ -393,7 +448,6 @@ export default function AdminPanel() {
                 className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
               />
             </div>
-
           </div>
 
           <div className="flex justify-end pt-2">
@@ -408,180 +462,157 @@ export default function AdminPanel() {
           </div>
         </div>
 
-        {/* 🏷️ قائمة البراندات */}
+        {/* 🏷️ البراندات */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-white">
             <Building2 className="w-5 h-5 text-amber-400" />
             <h2 className="font-bold text-lg">قائمة البراندات والمطاعم</h2>
           </div>
 
-          {brands.length === 0 ? (
-            <div className="text-center py-16 bg-neutral-900/50 border border-white/10 rounded-2xl">
-              <p className="text-neutral-400 text-sm mb-4">لا توجد براندات حالياً في قاعدة البيانات.</p>
-              <button
-                onClick={addNewBrand}
-                className="px-4 py-2 bg-amber-400 text-black font-bold rounded-xl text-xs"
-              >
-                إضافة أول براند
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {brands.map((brand, index) => (
-                <div key={brand.id || index} className="bg-neutral-900 border border-white/10 rounded-2xl p-5 shadow-xl transition-all">
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                    
-                    <div className="md:col-span-3 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl p-4 bg-neutral-950/60">
-                      <div className="w-24 h-24 bg-black rounded-xl border border-white/10 flex items-center justify-center p-2 mb-3 relative overflow-hidden group">
-                        <img src={brand.logo} alt={brand.name} className="w-full h-full object-contain" />
-                      </div>
-
-                      <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-xs text-amber-400 cursor-pointer transition-colors border border-white/5">
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>{uploadingLogoIndex === index ? 'جاري الرفع...' : 'تغيير الشعار'}</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            if (e.target.files?.[0]) handleFileUpload(index, e.target.files[0]);
-                          }}
-                        />
-                      </label>
+          <div className="space-y-6">
+            {brands.map((brand, index) => (
+              <div key={brand.id || index} className="bg-neutral-900 border border-white/10 rounded-2xl p-5 shadow-xl transition-all">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                  <div className="md:col-span-3 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl p-4 bg-neutral-950/60">
+                    <div className="w-24 h-24 bg-black rounded-xl border border-white/10 flex items-center justify-center p-2 mb-3 relative overflow-hidden group">
+                      <img src={brand.logo} alt={brand.name} className="w-full h-full object-contain" />
                     </div>
 
-                    <div className="md:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      
-                      <div>
-                        <label className="text-[11px] text-neutral-400 block mb-1">الاسم بالإنجليزية</label>
-                        <input
-                          type="text"
-                          value={brand.name || ''}
-                          onChange={(e) => handleInputChange(index, 'name', e.target.value)}
-                          className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-[11px] text-neutral-400 block mb-1">الاسم بالعربية</label>
-                        <input
-                          type="text"
-                          value={brand.arabic_name || ''}
-                          onChange={(e) => handleInputChange(index, 'arabic_name', e.target.value)}
-                          className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-[11px] text-neutral-400 block mb-1">المعرف (Instagram Handle)</label>
-                        <input
-                          type="text"
-                          value={brand.handle || ''}
-                          onChange={(e) => handleInputChange(index, 'handle', e.target.value)}
-                          className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-[11px] text-neutral-400 block mb-1">الفروع بالعربي (افصل بفاصلة)</label>
-                        <input
-                          type="text"
-                          placeholder="ازغوى، الهلال"
-                          value={Array.isArray(brand.locations_ar) ? brand.locations_ar.join(', ') : brand.locations_ar || ''}
-                          onChange={(e) => handleInputChange(index, 'locations_ar', e.target.value.split(',').map(s => s.trim()))}
-                          className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-[11px] text-neutral-400 block mb-1">الفروع بالإنجليزي (افصل بفاصلة)</label>
-                        <input
-                          type="text"
-                          placeholder="Izghawa, Al Hilal"
-                          value={Array.isArray(brand.locations_en) ? brand.locations_en.join(', ') : brand.locations_en || ''}
-                          onChange={(e) => handleInputChange(index, 'locations_en', e.target.value.split(',').map(s => s.trim()))}
-                          className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-[11px] text-neutral-400 block mb-1">الفئة (Category Filter)</label>
-                        <select
-                          value={brand.category || 'fastfood'}
-                          onChange={(e) => handleInputChange(index, 'category', e.target.value)}
-                          className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none"
-                        >
-                          <option value="fastfood">مطاعم وبرجر</option>
-                          <option value="cafe">كافيهات</option>
-                          <option value="sweets">حلويات</option>
-                          <option value="breakfast">فطور</option>
-                          <option value="healthy">صحي ومجمدات</option>
-                        </select>
-                      </div>
-
-                    </div>
-
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-xs text-amber-400 cursor-pointer transition-colors border border-white/5">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>{uploadingLogoIndex === index ? 'جاري الرفع...' : 'تغيير الشعار'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files?.[0]) handleFileUpload(index, e.target.files[0]);
+                        }}
+                      />
+                    </label>
                   </div>
 
-                  <div className="mt-5 pt-4 border-t border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="md:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     <div>
-                      <label className="text-[11px] text-amber-400 font-medium block mb-1">رابط سنونو المباشر (Snoonu)</label>
+                      <label className="text-[11px] text-neutral-400 block mb-1">الاسم بالإنجليزية</label>
                       <input
-                        type="url"
-                        placeholder="https://snoonu.com/merchant/..."
-                        value={brand.snoonu_url || ''}
-                        onChange={(e) => handleInputChange(index, 'snoonu_url', e.target.value)}
-                        className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-amber-400 outline-none dir-ltr"
+                        type="text"
+                        value={brand.name || ''}
+                        onChange={(e) => handleInputChange(index, 'name', e.target.value)}
+                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
                       />
                     </div>
 
                     <div>
-                      <label className="text-[11px] text-orange-400 font-medium block mb-1">رابط طلبات المباشر (Talabat)</label>
+                      <label className="text-[11px] text-neutral-400 block mb-1">الاسم بالعربية</label>
                       <input
-                        type="url"
-                        placeholder="https://www.talabat.com/..."
-                        value={brand.talabat_url || ''}
-                        onChange={(e) => handleInputChange(index, 'talabat_url', e.target.value)}
-                        className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-orange-400 outline-none dir-ltr"
+                        type="text"
+                        value={brand.arabic_name || ''}
+                        onChange={(e) => handleInputChange(index, 'arabic_name', e.target.value)}
+                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="text-[11px] text-red-400 font-medium block mb-1">رابط رفيق المباشر (Rafeeq)</label>
+                      <label className="text-[11px] text-neutral-400 block mb-1">المعرف (Instagram Handle)</label>
                       <input
-                        type="url"
-                        placeholder="https://www.gorafeeq.com/..."
-                        value={brand.rafeeq_url || ''}
-                        onChange={(e) => handleInputChange(index, 'rafeeq_url', e.target.value)}
-                        className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-red-400 outline-none dir-ltr"
+                        type="text"
+                        value={brand.handle || ''}
+                        onChange={(e) => handleInputChange(index, 'handle', e.target.value)}
+                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
                       />
                     </div>
+
+                    <div>
+                      <label className="text-[11px] text-neutral-400 block mb-1">الفروع بالعربي (افصل بفاصلة)</label>
+                      <input
+                        type="text"
+                        value={Array.isArray(brand.locations_ar) ? brand.locations_ar.join(', ') : brand.locations_ar || ''}
+                        onChange={(e) => handleInputChange(index, 'locations_ar', e.target.value.split(',').map(s => s.trim()))}
+                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] text-neutral-400 block mb-1">الفروع بالإنجليزي (افصل بفاصلة)</label>
+                      <input
+                        type="text"
+                        value={Array.isArray(brand.locations_en) ? brand.locations_en.join(', ') : brand.locations_en || ''}
+                        onChange={(e) => handleInputChange(index, 'locations_en', e.target.value.split(',').map(s => s.trim()))}
+                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] text-neutral-400 block mb-1">الفئة (Category Filter)</label>
+                      <select
+                        value={brand.category || 'fastfood'}
+                        onChange={(e) => handleInputChange(index, 'category', e.target.value)}
+                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none"
+                      >
+                        <option value="fastfood">مطاعم وبرجر</option>
+                        <option value="cafe">كافيهات</option>
+                        <option value="sweets">حلويات</option>
+                        <option value="breakfast">فطور</option>
+                        <option value="healthy">صحي ومجمدات</option>
+                      </select>
+                    </div>
                   </div>
-
-                  <div className="mt-5 flex items-center justify-end gap-2 pt-3 border-t border-white/5">
-                    <button
-                      onClick={() => deleteBrand(brand.id, index)}
-                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs hover:bg-red-500/20 transition-colors cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>حذف</span>
-                    </button>
-
-                    <button
-                      onClick={() => saveBrand(index)}
-                      disabled={savingId === (brand.id || index)}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition-colors cursor-pointer shadow-lg shadow-emerald-500/10"
-                    >
-                      <Save className="w-3.5 h-3.5" />
-                      <span>{savingId === (brand.id || index) ? 'جاري الحفظ...' : 'حفظ التغييرات'}</span>
-                    </button>
-                  </div>
-
                 </div>
-              ))}
-            </div>
-          )}
+
+                <div className="mt-5 pt-4 border-t border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-[11px] text-amber-400 font-medium block mb-1">رابط سنونو المباشر (Snoonu)</label>
+                    <input
+                      type="url"
+                      value={brand.snoonu_url || ''}
+                      onChange={(e) => handleInputChange(index, 'snoonu_url', e.target.value)}
+                      className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-amber-400 outline-none dir-ltr"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] text-orange-400 font-medium block mb-1">رابط طلبات المباشر (Talabat)</label>
+                    <input
+                      type="url"
+                      value={brand.talabat_url || ''}
+                      onChange={(e) => handleInputChange(index, 'talabat_url', e.target.value)}
+                      className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-orange-400 outline-none dir-ltr"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] text-red-400 font-medium block mb-1">رابط رفيق المباشر (Rafeeq)</label>
+                    <input
+                      type="url"
+                      value={brand.rafeeq_url || ''}
+                      onChange={(e) => handleInputChange(index, 'rafeeq_url', e.target.value)}
+                      className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-red-400 outline-none dir-ltr"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-5 flex items-center justify-end gap-2 pt-3 border-t border-white/5">
+                  <button
+                    onClick={() => deleteBrand(brand.id, index)}
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs hover:bg-red-500/20 transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>حذف</span>
+                  </button>
+
+                  <button
+                    onClick={() => saveBrand(index)}
+                    disabled={savingId === (brand.id || index)}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition-colors cursor-pointer shadow-lg shadow-emerald-500/10"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>{savingId === (brand.id || index) ? 'جاري الحفظ...' : 'حفظ التغييرات'}</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
       </div>
