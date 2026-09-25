@@ -33,12 +33,8 @@ interface SiteSettings {
   header_subtitle_en: string;
   footer_text_ar: string;
   footer_text_en: string;
-  instagram_url: string;
-  tiktok_url: string;
-  twitter_url: string;
-  youtube_url: string;
-  whatsapp_url: string;
-  email_url: string;
+  social_instagram: string;
+  social_whatsapp: string;
 }
 
 interface AdRequest {
@@ -51,7 +47,6 @@ interface AdRequest {
   project_details: string;
   created_at: string;
 }
-
 interface ContactMessage {
   id: number;
   name: string;
@@ -68,11 +63,11 @@ export default function AdminPanel() {
 
   const [brands, setBrands] = useState<Brand[]>([]);
   const [adRequests, setAdRequests] = useState<AdRequest[]>([]);
-  const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingLogoIndex, setUploadingLogoIndex] = useState<number | null>(null);
+  const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
 
   const [settings, setSettings] = useState<SiteSettings>({
     header_video_url: '',
@@ -82,14 +77,11 @@ export default function AdminPanel() {
     header_subtitle_en: '',
     footer_text_ar: '',
     footer_text_en: '',
-    instagram_url: '',
-    tiktok_url: '',
-    twitter_url: '',
-    youtube_url: '',
-    whatsapp_url: '',
-    email_url: ''
+    social_instagram: '',
+    social_whatsapp: ''
   });
 
+  // التحقق من حالة الجلسة عند فتح الصفحة
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -227,16 +219,6 @@ export default function AdminPanel() {
     }
   };
 
-  const deleteContactMessage = async (id: number) => {
-    if (!confirm('هل أنت متأكد من حذف هذه الرسالة؟')) return;
-    const { error } = await supabase.from('messages').delete().eq('id', id);
-    if (!error) {
-      setContactMessages(contactMessages.filter(msg => msg.id !== id));
-    } else {
-      alert('حدث خطأ أثناء حذف الرسالة');
-    }
-  };
-
   const addNewBrand = () => {
     const newBrand: Brand = {
       name: 'New Brand',
@@ -255,6 +237,7 @@ export default function AdminPanel() {
     setBrands([...brands, newBrand]);
   };
 
+  // 🔒 شاشة تسجيل الدخول الآمنة عبر Supabase Auth
   if (!session) {
     return (
       <div className="min-h-screen bg-neutral-950 text-white flex flex-col items-center justify-center p-4 dir-rtl font-sans">
@@ -262,10 +245,12 @@ export default function AdminPanel() {
           <div className="w-16 h-16 bg-amber-400/10 border border-amber-400/30 rounded-2xl flex items-center justify-center mx-auto text-amber-400">
             <Lock className="w-8 h-8" />
           </div>
+          
           <div>
             <h1 className="text-xl font-bold text-white mb-2">تسجيل دخول لوحة التحكم</h1>
             <p className="text-xs text-neutral-400">أدخل بيانات الحساب المعتمد للوصول إلى لوحة الإدارة.</p>
           </div>
+
           <form onSubmit={handleLogin} className="space-y-4 text-right">
             <div>
               <label className="text-[11px] text-neutral-400 block mb-1">البريد الإلكتروني</label>
@@ -297,6 +282,7 @@ export default function AdminPanel() {
               {loginLoading ? 'جاري التحقق...' : 'تسجيل الدخول'}
             </button>
           </form>
+
           <div className="pt-2 border-t border-white/5">
             <Link href="/" className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors">
               ← العودة إلى الصفحة الرئيسية للموقع
@@ -329,7 +315,7 @@ export default function AdminPanel() {
               </Link>
               <h1 className="text-2xl font-bold text-white">لوحة إدارة مجموعة QQQ</h1>
             </div>
-            <p className="text-xs text-neutral-400 mr-11">إدارة البراندات، الحجوزات الإعلانية، رسائل اتصل بنا، وإعدادات الموقع.</p>
+            <p className="text-xs text-neutral-400 mr-11">إدارة البراندات، الحجوزات الإعلانية، وإعدادات الهيدر والفوتر للموقع.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -435,7 +421,8 @@ export default function AdminPanel() {
           )}
         </div>
 
-        {/* 📬 رسائل نموذج "اتصل معنا" */}
+
+     {/* 📬 رسائل نموذج "اتصل معنا" */}
         <div className="bg-neutral-900 border border-cyan-500/20 rounded-2xl p-6 shadow-xl space-y-5">
           <div className="flex items-center justify-between border-b border-white/5 pb-3">
             <div className="flex items-center gap-2 text-cyan-400">
@@ -484,7 +471,15 @@ export default function AdminPanel() {
                     </a>
 
                     <button
-                      onClick={() => deleteContactMessage(msg.id)}
+                      onClick={async () => {
+                        if (!confirm('هل أنت متأكد من حذف هذه الرسالة؟')) return;
+                        const { error } = await supabase.from('messages').delete().eq('id', msg.id);
+                        if (!error) {
+                          setContactMessages(contactMessages.filter(m => m.id !== msg.id));
+                        } else {
+                          alert('حدث خطأ أثناء حذف الرسالة');
+                        }
+                      }}
                       className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
                       title="حذف الرسالة"
                     >
@@ -497,11 +492,12 @@ export default function AdminPanel() {
           )}
         </div>
 
-        {/* ⚙️ إعدادات الموقع وروابط التواصل */}
+
+        {/* ⚙️ إعدادات الموقع */}
         <div className="bg-neutral-900 border border-amber-500/20 rounded-2xl p-6 shadow-xl space-y-5">
           <div className="flex items-center gap-2 text-amber-400 border-b border-white/5 pb-3">
             <Settings className="w-5 h-5" />
-            <h2 className="font-bold text-base text-white">إعدادات الهيدر، الفوتر، وروابط وسائل التواصل</h2>
+            <h2 className="font-bold text-base text-white">إعدادات الهيدر والفوتر ووسائل التواصل</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -556,64 +552,22 @@ export default function AdminPanel() {
             </div>
 
             <div>
-              <label className="text-[11px] text-amber-400 block mb-1">رابط إنستغرام (Instagram)</label>
+              <label className="text-[11px] text-neutral-400 block mb-1">رابط إنستغرام (عبدالله الغافري)</label>
               <input
                 type="text"
-                value={settings.instagram_url || ''}
-                onChange={(e) => setSettings({ ...settings, instagram_url: e.target.value })}
+                value={settings.social_instagram || ''}
+                onChange={(e) => setSettings({ ...settings, social_instagram: e.target.value })}
                 className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
               />
             </div>
 
             <div>
-              <label className="text-[11px] text-amber-400 block mb-1">رابط تيك توك (TikTok)</label>
+              <label className="text-[11px] text-neutral-400 block mb-1">رابط أو رقم واتساب (عبدالله الغافري)</label>
               <input
                 type="text"
-                value={settings.tiktok_url || ''}
-                onChange={(e) => setSettings({ ...settings, tiktok_url: e.target.value })}
+                value={settings.social_whatsapp || ''}
+                onChange={(e) => setSettings({ ...settings, social_whatsapp: e.target.value })}
                 className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] text-amber-400 block mb-1">رابط إكس / تويتر (X / Twitter)</label>
-              <input
-                type="text"
-                value={settings.twitter_url || ''}
-                onChange={(e) => setSettings({ ...settings, twitter_url: e.target.value })}
-                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] text-amber-400 block mb-1">رابط يوتيوب (YouTube)</label>
-              <input
-                type="text"
-                value={settings.youtube_url || ''}
-                onChange={(e) => setSettings({ ...settings, youtube_url: e.target.value })}
-                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] text-emerald-400 block mb-1">رابط واتساب (WhatsApp)</label>
-              <input
-                type="text"
-                value={settings.whatsapp_url || ''}
-                onChange={(e) => setSettings({ ...settings, whatsapp_url: e.target.value })}
-                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-emerald-400 outline-none dir-ltr"
-                placeholder="https://wa.me/..."
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] text-amber-400 block mb-1">رابط أو البريد الإلكتروني (Email)</label>
-              <input
-                type="text"
-                value={settings.email_url || ''}
-                onChange={(e) => setSettings({ ...settings, email_url: e.target.value })}
-                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                placeholder="mailto:..."
               />
             </div>
 
@@ -715,79 +669,87 @@ export default function AdminPanel() {
                       <label className="text-[11px] text-neutral-400 block mb-1">الفروع بالعربي (افصل بفاصلة)</label>
                       <input
                         type="text"
-                        value={Array.isArray(brand.locations_ar) ? brand.locations_ar.join('، ') : brand.locations_ar || ''}
-                        onChange={(e) => handleInputChange(index, 'locations_ar', e.target.value.split('،'))}
+                        value={Array.isArray(brand.locations_ar) ? brand.locations_ar.join(', ') : brand.locations_ar || ''}
+                        onChange={(e) => handleInputChange(index, 'locations_ar', e.target.value.split(',').map(s => s.trim()))}
                         className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">Locations (English, comma separated)</label>
+                      <label className="text-[11px] text-neutral-400 block mb-1">الفروع بالإنجليزي (افصل بفاصلة)</label>
                       <input
                         type="text"
                         value={Array.isArray(brand.locations_en) ? brand.locations_en.join(', ') : brand.locations_en || ''}
-                        onChange={(e) => handleInputChange(index, 'locations_en', e.target.value.split(','))}
+                        onChange={(e) => handleInputChange(index, 'locations_en', e.target.value.split(',').map(s => s.trim()))}
                         className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
                       />
                     </div>
 
                     <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">تصنيف البراند (Category)</label>
-                      <input
-                        type="text"
-                        value={brand.category || ''}
+                      <label className="text-[11px] text-neutral-400 block mb-1">الفئة (Category Filter)</label>
+                      <select
+                        value={brand.category || 'fastfood'}
                         onChange={(e) => handleInputChange(index, 'category', e.target.value)}
-                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                      />
+                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none"
+                      >
+                        <option value="fastfood">مطاعم وبرجر</option>
+                        <option value="cafe">كافيهات</option>
+                        <option value="sweets">حلويات</option>
+                        <option value="breakfast">فطور</option>
+                        <option value="healthy">صحي ومجمدات</option>
+                      </select>
                     </div>
+                  </div>
+                </div>
 
-                    <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">رابط سونيور (Snoonu)</label>
-                      <input
-                        type="text"
-                        value={brand.snoonu_url || ''}
-                        onChange={(e) => handleInputChange(index, 'snoonu_url', e.target.value)}
-                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                      />
-                    </div>
+                <div className="mt-5 pt-4 border-t border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-[11px] text-amber-400 font-medium block mb-1">رابط سنونو المباشر (Snoonu)</label>
+                    <input
+                      type="url"
+                      value={brand.snoonu_url || ''}
+                      onChange={(e) => handleInputChange(index, 'snoonu_url', e.target.value)}
+                      className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-amber-400 outline-none dir-ltr"
+                    />
+                  </div>
 
-                    <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">رابط طلبات (Talabat)</label>
-                      <input
-                        type="text"
-                        value={brand.talabat_url || ''}
-                        onChange={(e) => handleInputChange(index, 'talabat_url', e.target.value)}
-                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                      />
-                    </div>
+                  <div>
+                    <label className="text-[11px] text-orange-400 font-medium block mb-1">رابط طلبات المباشر (Talabat)</label>
+                    <input
+                      type="url"
+                      value={brand.talabat_url || ''}
+                      onChange={(e) => handleInputChange(index, 'talabat_url', e.target.value)}
+                      className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-orange-400 outline-none dir-ltr"
+                    />
+                  </div>
 
-                    <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">رابط رفيق (Rafeeq)</label>
-                      <input
-                        type="text"
-                        value={brand.rafeeq_url || ''}
-                        onChange={(e) => handleInputChange(index, 'rafeeq_url', e.target.value)}
-                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                      />
-                    </div>
+                  <div>
+                    <label className="text-[11px] text-red-400 font-medium block mb-1">رابط رفيق المباشر (Rafeeq)</label>
+                    <input
+                      type="url"
+                      value={brand.rafeeq_url || ''}
+                      onChange={(e) => handleInputChange(index, 'rafeeq_url', e.target.value)}
+                      className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-red-400 outline-none dir-ltr"
+                    />
                   </div>
                 </div>
 
                 <div className="mt-5 flex items-center justify-end gap-2 pt-3 border-t border-white/5">
                   <button
                     onClick={() => deleteBrand(brand.id, index)}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-bold transition-all cursor-pointer border border-red-500/20"
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs hover:bg-red-500/20 transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                    <span>حذف البراند</span>
+                    <span>حذف</span>
                   </button>
+
                   <button
                     onClick={() => saveBrand(index)}
                     disabled={savingId === (brand.id || index)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 text-black font-bold text-xs hover:bg-amber-300 transition-all cursor-pointer shadow-lg shadow-amber-400/10"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition-colors cursor-pointer shadow-lg shadow-emerald-500/10"
                   >
                     <Save className="w-3.5 h-3.5" />
-                    <span>{savingId === (brand.id || index) ? 'جاري الحفظ...' : 'حفظ التعديلات'}</span>
+                    <span>{savingId === (brand.id || index) ? 'جاري الحفظ...' : 'حفظ التغييرات'}</span>
                   </button>
                 </div>
               </div>
