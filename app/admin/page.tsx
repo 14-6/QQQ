@@ -33,6 +33,8 @@ interface SiteSettings {
   header_subtitle_en: string;
   footer_text_ar: string;
   footer_text_en: string;
+  social_instagram: string;
+  social_whatsapp: string;
 }
 
 interface AdRequest {
@@ -66,7 +68,9 @@ export default function AdminPanel() {
     header_subtitle_ar: '',
     header_subtitle_en: '',
     footer_text_ar: '',
-    footer_text_en: ''
+    footer_text_en: '',
+    social_instagram: '',
+    social_whatsapp: ''
   });
 
   // التحقق من حالة الجلسة عند فتح الصفحة
@@ -182,7 +186,7 @@ export default function AdminPanel() {
     if (error) {
       alert('حدث خطأ أثناء حفظ الإعدادات: ' + error.message);
     } else {
-      alert('تم حفظ إعدادات الهيدر والفوتر بنجاح!');
+      alert('تم حفظ إعدادات الموقع بالكامل بنجاح!');
     }
   };
 
@@ -410,7 +414,7 @@ export default function AdminPanel() {
         <div className="bg-neutral-900 border border-amber-500/20 rounded-2xl p-6 shadow-xl space-y-5">
           <div className="flex items-center gap-2 text-amber-400 border-b border-white/5 pb-3">
             <Settings className="w-5 h-5" />
-            <h2 className="font-bold text-base text-white">إعدادات الهيدر والفوتر (Header & Footer)</h2>
+            <h2 className="font-bold text-base text-white">إعدادات الهيدر والفوتر ووسائل التواصل</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -460,6 +464,26 @@ export default function AdminPanel() {
                 rows={2}
                 value={settings.header_subtitle_en || ''}
                 onChange={(e) => setSettings({ ...settings, header_subtitle_en: e.target.value })}
+                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] text-neutral-400 block mb-1">رابط إنستغرام (عبدالله الغافري)</label>
+              <input
+                type="text"
+                value={settings.social_instagram || ''}
+                onChange={(e) => setSettings({ ...settings, social_instagram: e.target.value })}
+                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] text-neutral-400 block mb-1">رابط أو رقم واتساب (عبدالله الغافري)</label>
+              <input
+                type="text"
+                value={settings.social_whatsapp || ''}
+                onChange={(e) => setSettings({ ...settings, social_whatsapp: e.target.value })}
                 className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
               />
             </div>
@@ -617,7 +641,7 @@ export default function AdminPanel() {
                   </div>
 
                   <div>
-                    <label className="text-[11px] text-red-400 font-medium block, mb-1">رابط رفيق المباشر (Rafeeq)</label>
+                    <label className="text-[11px] text-red-400 font-medium block mb-1">رابط رفيق المباشر (Rafeeq)</label>
                     <input
                       type="url"
                       value={brand.rafeeq_url || ''}
