@@ -446,7 +446,6 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {filteredBrands.map(brand => {
                 const currentLocations = lang === 'ar' ? brand.locationsAr : brand.locationsEn;
-                // إظهار الاسم بالعربي إذا كانت اللغة عربية، وبالإنجليزي إذا كانت إنجليزية
                 const displayName = lang === 'ar' ? (brand.arabicName || brand.name) : (brand.name || brand.arabicName);
 
                 return (
@@ -690,7 +689,7 @@ export default function Home() {
                 <button
                   type="submit"
                   disabled={isSendingMessage}
-                  className="w-full bg-amber-400 hover:bg-amber-300 text-black font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full bg-amber-400 hover:bg-amber-300 text-black font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
                 >
                   {isSendingMessage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                   <span>{t.sendBtn}</span>
@@ -700,9 +699,9 @@ export default function Home() {
 
           </div>
 
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-neutral-500 gap-3">
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
             <p>© {new Date().getFullYear()} QQQ Group. {t.rightsReserved}</p>
-            <p className="text-neutral-600">Designed & Developed for QQQ Brands</p>
+            <p className="font-mono text-[11px] text-amber-400/80">Abdulla AlGhafri Platform</p>
           </div>
         </div>
       </footer>

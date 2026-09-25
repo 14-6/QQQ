@@ -38,6 +38,7 @@ interface SiteSettings {
   twitter_url: string;
   youtube_url: string;
   whatsapp_url: string;
+  email_url: string;
 }
 
 interface AdRequest {
@@ -76,7 +77,8 @@ export default function AdminPanel() {
     tiktok_url: '',
     twitter_url: '',
     youtube_url: '',
-    whatsapp_url: ''
+    whatsapp_url: '',
+    email_url: ''
   });
 
   useEffect(() => {
@@ -469,7 +471,7 @@ export default function AdminPanel() {
               />
             </div>
 
-            {/* خانات وسائل التواصل الخاصة بالفوتر */}
+            {/* خانات وسائل التواصل للفوتر */}
             <div>
               <label className="text-[11px] text-amber-400 block mb-1">رابط إنستغرام (Instagram)</label>
               <input
@@ -510,13 +512,25 @@ export default function AdminPanel() {
               />
             </div>
 
-            <div className="md:col-span-2">
-              <label className="text-[11px] text-amber-400 block mb-1">رابط واتساب أو البريد (WhatsApp / Email)</label>
+            <div>
+              <label className="text-[11px] text-emerald-400 block mb-1">رابط واتساب (WhatsApp)</label>
               <input
                 type="text"
                 value={settings.whatsapp_url || ''}
                 onChange={(e) => setSettings({ ...settings, whatsapp_url: e.target.value })}
+                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-emerald-400 outline-none dir-ltr"
+                placeholder="https://wa.me/..."
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] text-amber-400 block mb-1">رابط أو البريد الإلكتروني (Email)</label>
+              <input
+                type="text"
+                value={settings.email_url || ''}
+                onChange={(e) => setSettings({ ...settings, email_url: e.target.value })}
                 className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+                placeholder="mailto:..."
               />
             </div>
 
