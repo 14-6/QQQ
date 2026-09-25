@@ -33,8 +33,11 @@ interface SiteSettings {
   header_subtitle_en: string;
   footer_text_ar: string;
   footer_text_en: string;
-  social_instagram: string;
-  social_whatsapp: string;
+  instagram_url: string;
+  tiktok_url: string;
+  twitter_url: string;
+  youtube_url: string;
+  whatsapp_url: string;
 }
 
 interface AdRequest {
@@ -69,11 +72,13 @@ export default function AdminPanel() {
     header_subtitle_en: '',
     footer_text_ar: '',
     footer_text_en: '',
-    social_instagram: '',
-    social_whatsapp: ''
+    instagram_url: '',
+    tiktok_url: '',
+    twitter_url: '',
+    youtube_url: '',
+    whatsapp_url: ''
   });
 
-  // التحقق من حالة الجلسة عند فتح الصفحة
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -226,7 +231,6 @@ export default function AdminPanel() {
     setBrands([...brands, newBrand]);
   };
 
-  // 🔒 شاشة تسجيل الدخول الآمنة عبر Supabase Auth
   if (!session) {
     return (
       <div className="min-h-screen bg-neutral-950 text-white flex flex-col items-center justify-center p-4 dir-rtl font-sans">
@@ -234,12 +238,10 @@ export default function AdminPanel() {
           <div className="w-16 h-16 bg-amber-400/10 border border-amber-400/30 rounded-2xl flex items-center justify-center mx-auto text-amber-400">
             <Lock className="w-8 h-8" />
           </div>
-          
           <div>
             <h1 className="text-xl font-bold text-white mb-2">تسجيل دخول لوحة التحكم</h1>
             <p className="text-xs text-neutral-400">أدخل بيانات الحساب المعتمد للوصول إلى لوحة الإدارة.</p>
           </div>
-
           <form onSubmit={handleLogin} className="space-y-4 text-right">
             <div>
               <label className="text-[11px] text-neutral-400 block mb-1">البريد الإلكتروني</label>
@@ -271,7 +273,6 @@ export default function AdminPanel() {
               {loginLoading ? 'جاري التحقق...' : 'تسجيل الدخول'}
             </button>
           </form>
-
           <div className="pt-2 border-t border-white/5">
             <Link href="/" className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors">
               ← العودة إلى الصفحة الرئيسية للموقع
@@ -410,11 +411,11 @@ export default function AdminPanel() {
           )}
         </div>
 
-        {/* ⚙️ إعدادات الموقع */}
+        {/* ⚙️ إعدادات الموقع وروابط التواصل */}
         <div className="bg-neutral-900 border border-amber-500/20 rounded-2xl p-6 shadow-xl space-y-5">
           <div className="flex items-center gap-2 text-amber-400 border-b border-white/5 pb-3">
             <Settings className="w-5 h-5" />
-            <h2 className="font-bold text-base text-white">إعدادات الهيدر والفوتر ووسائل التواصل</h2>
+            <h2 className="font-bold text-base text-white">إعدادات الهيدر، الفوتر، وروابط وسائل التواصل</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -468,22 +469,53 @@ export default function AdminPanel() {
               />
             </div>
 
+            {/* خانات وسائل التواصل الخاصة بالفوتر */}
             <div>
-              <label className="text-[11px] text-neutral-400 block mb-1">رابط إنستغرام (عبدالله الغافري)</label>
+              <label className="text-[11px] text-amber-400 block mb-1">رابط إنستغرام (Instagram)</label>
               <input
                 type="text"
-                value={settings.social_instagram || ''}
-                onChange={(e) => setSettings({ ...settings, social_instagram: e.target.value })}
+                value={settings.instagram_url || ''}
+                onChange={(e) => setSettings({ ...settings, instagram_url: e.target.value })}
                 className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
               />
             </div>
 
             <div>
-              <label className="text-[11px] text-neutral-400 block mb-1">رابط أو رقم واتساب (عبدالله الغافري)</label>
+              <label className="text-[11px] text-amber-400 block mb-1">رابط تيك توك (TikTok)</label>
               <input
                 type="text"
-                value={settings.social_whatsapp || ''}
-                onChange={(e) => setSettings({ ...settings, social_whatsapp: e.target.value })}
+                value={settings.tiktok_url || ''}
+                onChange={(e) => setSettings({ ...settings, tiktok_url: e.target.value })}
+                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] text-amber-400 block mb-1">رابط إكس / تويتر (X / Twitter)</label>
+              <input
+                type="text"
+                value={settings.twitter_url || ''}
+                onChange={(e) => setSettings({ ...settings, twitter_url: e.target.value })}
+                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] text-amber-400 block mb-1">رابط يوتيوب (YouTube)</label>
+              <input
+                type="text"
+                value={settings.youtube_url || ''}
+                onChange={(e) => setSettings({ ...settings, youtube_url: e.target.value })}
+                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="text-[11px] text-amber-400 block mb-1">رابط واتساب أو البريد (WhatsApp / Email)</label>
+              <input
+                type="text"
+                value={settings.whatsapp_url || ''}
+                onChange={(e) => setSettings({ ...settings, whatsapp_url: e.target.value })}
                 className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
               />
             </div>
