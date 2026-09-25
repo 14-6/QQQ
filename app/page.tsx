@@ -20,7 +20,6 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
 interface DeliveryPlatform {
   name: string;
   nameEn: string;
@@ -284,11 +283,11 @@ export default function Home() {
   const t = content[lang];
 
   // أخذ الروابط الديناميكية من site_settings أو الاعتماد على القيم الافتراضية
-  const instagramUrl = siteSettings?.instagram_url || 'https://instagram.com/qqq';
-  const tiktokUrl = siteSettings?.tiktok_url || 'https://tiktok.com/@qqq';
-  const twitterUrl = siteSettings?.twitter_url || 'https://x.com/qqq';
-  const youtubeUrl = siteSettings?.youtube_url || 'https://youtube.com/@qqq';
-  const emailUrl = siteSettings?.email ? `mailto:${siteSettings.email}` : 'mailto:info@qqq.qa';
+  const instagramUrl = siteSettings?.instagram_url || '#';
+  const tiktokUrl = siteSettings?.tiktok_url || '#';
+  const twitterUrl = siteSettings?.twitter_url || '#';
+  const youtubeUrl = siteSettings?.youtube_url || '#';
+  const emailUrl = siteSettings?.email ? `mailto:${siteSettings.email}` : '#';
 
   return (
     <main className="min-h-screen bg-[#121212] text-white font-sans overflow-x-hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
