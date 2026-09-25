@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Save, Upload, Trash2, Plus, RefreshCw, ArrowLeft, Settings, Building2 } from 'lucide-react';
+import { Save, Upload, Trash2, Plus, RefreshCw, ArrowLeft, Settings, Building2, MessageSquare, Calendar, Clock, Mail, Phone } from 'lucide-react';
 import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -35,8 +35,20 @@ interface SiteSettings {
   footer_text_en: string;
 }
 
+interface AdRequest {
+  id: number;
+  full_name: string;
+  email: string;
+  whatsapp: string;
+  ad_date: string;
+  ad_time: string;
+  project_details: string;
+  created_at: string;
+}
+
 export default function AdminPanel() {
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [adRequests, setAdRequests] = useState<AdRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -66,6 +78,10 @@ export default function AdminPanel() {
     // جلب إعدادات الموقع
     const { data: settingsData } = await supabase.from('site_settings').select('*').eq('id', 1).single();
     if (settingsData) setSettings(settingsData);
+
+    // جلب طلبات الإعلانات
+    const { data: requestsData } = await supabase.from('ad_requests').select('*').order('created_at', { ascending: false });
+    if (requestsData) setAdRequests(requestsData);
 
     setLoading(false);
   };
@@ -145,6 +161,17 @@ export default function AdminPanel() {
     setBrands(brands.filter((_, i) => i !== index));
   };
 
+  // حذف طلب إعلان
+  const deleteAdRequest = async (id: number) => {
+    if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
+    const { error } = await supabase.from('ad_requests').delete().eq('id', id);
+    if (!error) {
+      setAdRequests(adRequests.filter(req => req.id !== id));
+    } else {
+      alert('حدث خطأ أثناء الحذف');
+    }
+  };
+
   // إضافة براند جديد
   const addNewBrand = () => {
     const newBrand: Brand = {
@@ -186,7 +213,7 @@ export default function AdminPanel() {
               </Link>
               <h1 className="text-2xl font-bold text-white">لوحة إدارة مجموعة QQQ</h1>
             </div>
-            <p className="text-xs text-neutral-400 mr-11">إدارة بيانات البراندات، الفروع، وإعدادات الهيدر والفوتر للموقع.</p>
+            <p className="text-xs text-neutral-400 mr-11">إدارة البراندات، الحجوزات الإعلانية، وإعدادات الهيدر والفوتر للموقع.</p>
           </div>
 
           <button
@@ -196,6 +223,83 @@ export default function AdminPanel() {
             <Plus className="w-4 h-4" />
             <span>إضافة براند جديد</span>
           </button>
+        </div>
+
+
+        {/* 📋 قسم طلبات حجز الإعلانات الواردة */}
+        <div className="bg-neutral-900 border border-amber-500/20 rounded-2xl p-6 shadow-xl space-y-5">
+          <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <div className="flex items-center gap-2 text-amber-400">
+              <MessageSquare className="w-5 h-5" />
+              <h2 className="font-bold text-base text-white">طلبات حجز المساحات الإعلانية الواردة</h2>
+            </div>
+            <span className="px-3 py-1 bg-amber-400/10 text-amber-400 border border-amber-400/20 rounded-full text-xs font-bold">
+              {adRequests.length} طلبات
+            </span>
+          </div>
+
+          {adRequests.length === 0 ? (
+            <p className="text-xs text-neutral-400 text-center py-6">لا توجد طلبات حجز إعلانات حتى الآن.</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              {adRequests.map((req) => (
+                <div key={req.id} className="bg-neutral-950 border border-white/10 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <span className="font-bold text-sm text-white">{req.full_name}</span>
+                      <span className="text-[10px] text-neutral-400 bg-neutral-900 px-2.5 py-1 rounded-md border border-white/5">
+                        {new Date(req.created_at).toLocaleString('ar-QA')}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-300">
+                      <div className="flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-amber-400" />
+                        <span className="dir-ltr">{req.email}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="dir-ltr">{req.whatsapp}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>{req.ad_date}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-orange-400" />
+                        <span>{req.ad_time}</span>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-neutral-400 bg-neutral-900/60 p-2.5 rounded-lg border border-white/5">
+                      <span className="text-amber-400 font-bold">تفاصيل المشروع: </span>
+                      {req.project_details}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                    <a
+                      href={`https://wa.me/${req.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`مرحباً بك ${req.full_name}، بخصوص طلبك لحجز مساحة إعلانية في مجموعة QQQ...`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition-colors"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>رد واتساب</span>
+                    </a>
+
+                    <button
+                      onClick={() => deleteAdRequest(req.id)}
+                      className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
+                      title="حذف الطلب"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         
@@ -279,53 +383,6 @@ export default function AdminPanel() {
                 onChange={(e) => setSettings({ ...settings, footer_text_en: e.target.value })}
                 className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
               />
-            </div>
-
-            {/* روابط التواصل الاجتماعي والفوتر */}
-            <div className="md:col-span-2 border-t border-white/5 pt-3 mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <div>
-                <label className="text-[11px] text-amber-400 block mb-1">رابط إنستغرام (Instagram)</label>
-                <input
-                  type="url"
-                  placeholder="https://instagram.com/..."
-                  value={(settings as any).instagram_url || ''}
-                  onChange={(e) => setSettings({ ...settings, instagram_url: e.target.value } as any)}
-                  className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] text-yellow-400 block mb-1">رابط سناب شات (Snapchat)</label>
-                <input
-                  type="url"
-                  placeholder="https://snapchat.com/add/..."
-                  value={(settings as any).snapchat_url || ''}
-                  onChange={(e) => setSettings({ ...settings, snapchat_url: e.target.value } as any)}
-                  className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] text-cyan-400 block mb-1">رابط تيك توك (TikTok)</label>
-                <input
-                  type="url"
-                  placeholder="https://tiktok.com/@..."
-                  value={(settings as any).tiktok_url || ''}
-                  onChange={(e) => setSettings({ ...settings, tiktok_url: e.target.value } as any)}
-                  className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] text-sky-400 block mb-1">البريد الإلكتروني للظهور في الفوتر</label>
-                <input
-                  type="email"
-                  placeholder="info@qqq.qa"
-                  value={(settings as any).email_address || ''}
-                  onChange={(e) => setSettings({ ...settings, email_address: e.target.value } as any)}
-                  className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                />
-              </div>
             </div>
 
           </div>
