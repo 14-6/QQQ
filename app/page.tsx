@@ -205,14 +205,33 @@ export default function Home() {
     setLang(prev => (prev === 'ar' ? 'en' : 'ar'));
   };
 
-  const handleSendMessage = (e: React.FormEvent) => {
+const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSendingMessage(true);
-    setTimeout(() => {
-      alert(lang === 'ar' ? 'تم إرسال رسالتك بنجاح!' : 'Your message has been sent successfully!');
-      setContactForm({ name: '', contact: '', message: '' });
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(contactForm),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        alert(lang === 'ar' ? 'تم إرسال رسالتك بنجاح!' : 'Your message has been sent successfully!');
+        setContactForm({ name: '', contact: '', message: '' });
+      } else {
+        alert(lang === 'ar' ? 'حدث خطأ أثناء الإرسال، حاول مرة أخرى.' : 'Error sending message, please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert(lang === 'ar' ? 'حدث خطأ غير متوقع.' : 'An unexpected error occurred.');
+    } finally {
       setIsSendingMessage(false);
-    }, 800);
+    }
   };
 
   const filteredBrands = brands.filter(brand => {
