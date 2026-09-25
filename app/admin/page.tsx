@@ -36,7 +36,7 @@ interface SiteSettings {
 }
 
 interface AdRequest {
-  id: number;
+  id: string; // تم التعديل إلى string لدعم الـ UUID
   full_name: string;
   email: string;
   whatsapp: string;
@@ -161,8 +161,8 @@ export default function AdminPanel() {
     setBrands(brands.filter((_, i) => i !== index));
   };
 
-  // حذف طلب إعلان
-  const deleteAdRequest = async (id: number) => {
+  // حذف طلب إعلان (مع دعم الـ UUID كـ string)
+  const deleteAdRequest = async (id: string) => {
     if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
     const { error } = await supabase.from('ad_requests').delete().eq('id', id);
     if (!error) {
@@ -278,6 +278,7 @@ export default function AdminPanel() {
                   </div>
 
                   <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                    {/* زر الواتساب */}
                     <a
                       href={`https://wa.me/${req.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`مرحباً بك ${req.full_name}، بخصوص طلبك لحجز مساحة إعلانية في مجموعة QQQ...`)}`}
                       target="_blank"
@@ -288,6 +289,16 @@ export default function AdminPanel() {
                       <span>رد واتساب</span>
                     </a>
 
+                    {/* زر الإيميل */}
+                    <a
+                      href={`mailto:${req.email}?subject=${encodeURIComponent('بخصوص طلب حجز مساحة إعلانية - مجموعة QQQ')}&body=${encodeURIComponent(`مرحباً ${req.full_name},\n\nشكراً لتواصلك معنا بخصوص طلب إعلانك بمشروع QQQ.\n\nتحياتنا،`)}`}
+                      className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition-colors"
+                    >
+                      <Mail className="w-3.5 h-3.5" />
+                      <span>إرسال إيميل</span>
+                    </a>
+
+                    {/* زر الحذف */}
                     <button
                       onClick={() => deleteAdRequest(req.id)}
                       className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
@@ -312,7 +323,6 @@ export default function AdminPanel() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            {/* الهيدر */}
             <div className="md:col-span-2">
               <label className="text-[11px] text-neutral-400 block mb-1">رابط فيديو الهيدر (Header Video URL)</label>
               <input
@@ -364,7 +374,6 @@ export default function AdminPanel() {
               />
             </div>
 
-            {/* الفوتر وحقوق النشر */}
             <div>
               <label className="text-[11px] text-neutral-400 block mb-1">نص الفوتر وحقوق النشر (عربي)</label>
               <input
@@ -423,7 +432,6 @@ export default function AdminPanel() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
                     
-                    {/* رفع وقراءة الصورة */}
                     <div className="md:col-span-3 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl p-4 bg-neutral-950/60">
                       <div className="w-24 h-24 bg-black rounded-xl border border-white/10 flex items-center justify-center p-2 mb-3 relative overflow-hidden group">
                         <img src={brand.logo} alt={brand.name} className="w-full h-full object-contain" />
@@ -443,7 +451,6 @@ export default function AdminPanel() {
                       </label>
                     </div>
 
-                    {/* البيانات الأساسية */}
                     <div className="md:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       
                       <div>
@@ -517,7 +524,6 @@ export default function AdminPanel() {
 
                   </div>
 
-                  {/* روابط منصات التوصيل */}
                   <div className="mt-5 pt-4 border-t border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <label className="text-[11px] text-amber-400 font-medium block mb-1">رابط سنونو المباشر (Snoonu)</label>
@@ -553,7 +559,6 @@ export default function AdminPanel() {
                     </div>
                   </div>
 
-                  {/* أزرار الحفظ والحذف */}
                   <div className="mt-5 flex items-center justify-end gap-2 pt-3 border-t border-white/5">
                     <button
                       onClick={() => deleteBrand(brand.id, index)}
