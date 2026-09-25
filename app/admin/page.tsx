@@ -8,7 +8,7 @@ import Link from 'next/link';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
-const [contactMessages, setContactMessages] = useState<any[]>([]);
+
 
 interface Brand {
   id?: number;
