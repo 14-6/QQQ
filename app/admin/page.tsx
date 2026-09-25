@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Save, Upload, Trash2, Plus, RefreshCw, ArrowLeft, Settings, Building2, MessageSquare, Calendar, Clock, Mail, Phone, Lock } from 'lucide-react';
+import { Save, Upload, Trash2, Plus, RefreshCw, ArrowLeft, Settings, Building2, MessageSquare, Calendar, Clock, Mail, Phone, Lock, LogOut } from 'lucide-react';
 import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -47,8 +47,11 @@ interface AdRequest {
 }
 
 export default function AdminPanel() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [passcode, setPasscode] = useState('');
+  const [session, setSession] = useState<any>(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
+
   const [brands, setBrands] = useState<Brand[]>([]);
   const [adRequests, setAdRequests] = useState<AdRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,26 +69,45 @@ export default function AdminPanel() {
     footer_text_en: ''
   });
 
-  // التحقق هل تم تسجيل الدخول مسبقاً من المتصفح
+  // التحقق من حالة الجلسة عند فتح الصفحة
   useEffect(() => {
-    const authStatus = localStorage.getItem('qqq_admin_auth');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
-    }
-    fetchData();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) fetchData();
+      else setLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) fetchData();
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 🔐 ضع هنا كلمة المرور السرية الخاصة بك للدخول للوحة التحكم
-    const SECRET_PASSWORD = 'QQQ2026Admin!'; 
+    setLoginLoading(true);
 
-    if (passcode === SECRET_PASSWORD) {
-      localStorage.setItem('qqq_admin_auth', 'true');
-      setIsAuthenticated(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoginLoading(false);
+
+    if (error) {
+      alert('خطأ في تسجيل الدخول: البريد أو كلمة المرور غير صحيحة.');
     } else {
-      alert('كلمة المرور غير صحيحة!');
+      fetchData();
     }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
   };
 
   const fetchData = async () => {
@@ -200,8 +222,8 @@ export default function AdminPanel() {
     setBrands([...brands, newBrand]);
   };
 
-  // 🔒 إذا لم يتم إدخال كلمة المرور، اعرض شاشة قفل حماية الأدمن
-  if (!isAuthenticated) {
+  // 🔒 شاشة تسجيل الدخول الآمنة عبر Supabase Auth
+  if (!session) {
     return (
       <div className="min-h-screen bg-neutral-950 text-white flex flex-col items-center justify-center p-4 dir-rtl font-sans">
         <div className="max-w-md w-full bg-neutral-900 border border-amber-500/30 rounded-3xl p-8 shadow-2xl space-y-6 text-center">
@@ -210,24 +232,39 @@ export default function AdminPanel() {
           </div>
           
           <div>
-            <h1 className="text-xl font-bold text-white mb-2">منطقة محمية - لوحة تحكم QQQ</h1>
-            <p className="text-xs text-neutral-400">الرجاء إدخال كلمة المرور السرية للوصول إلى لوحة التحكم.</p>
+            <h1 className="text-xl font-bold text-white mb-2">تسجيل دخول لوحة التحكم</h1>
+            <p className="text-xs text-neutral-400">أدخل بيانات الحساب المعتمد للوصول إلى لوحة الإدارة.</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <input
-              type="password"
-              placeholder="أدخل كلمة المرور السرية..."
-              value={passcode}
-              onChange={(e) => setPasscode(e.target.value)}
-              className="w-full bg-neutral-950 border border-white/10 rounded-2xl px-4 py-3 text-sm text-center text-white focus:border-amber-400 outline-none transition-colors"
-              autoFocus
-            />
+          <form onSubmit={handleLogin} className="space-y-4 text-right">
+            <div>
+              <label className="text-[11px] text-neutral-400 block mb-1">البريد الإلكتروني</label>
+              <input
+                type="email"
+                placeholder="admin@qqq.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-neutral-950 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:border-amber-400 outline-none transition-colors dir-ltr text-right"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-[11px] text-neutral-400 block mb-1">كلمة المرور</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-neutral-950 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:border-amber-400 outline-none transition-colors dir-ltr text-right"
+                required
+              />
+            </div>
             <button
               type="submit"
-              className="w-full py-3 bg-amber-400 text-black font-bold rounded-2xl text-sm hover:bg-amber-300 transition-colors shadow-lg shadow-amber-400/10 cursor-pointer"
+              disabled={loginLoading}
+              className="w-full py-3 bg-amber-400 text-black font-bold rounded-2xl text-sm hover:bg-amber-300 transition-colors shadow-lg shadow-amber-400/10 cursor-pointer mt-2"
             >
-              دخول لوحة التحكم
+              {loginLoading ? 'جاري التحقق...' : 'تسجيل الدخول'}
             </button>
           </form>
 
@@ -268,13 +305,11 @@ export default function AdminPanel() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => {
-                localStorage.removeItem('qqq_admin_auth');
-                setIsAuthenticated(false);
-              }}
-              className="px-3 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-all cursor-pointer"
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-all cursor-pointer"
             >
-              تسجيل خروج
+              <LogOut className="w-3.5 h-3.5" />
+              <span>تسجيل خروج</span>
             </button>
 
             <button
@@ -582,7 +617,7 @@ export default function AdminPanel() {
                   </div>
 
                   <div>
-                    <label className="text-[11px] text-red-400 font-medium block mb-1">رابط رفيق المباشر (Rafeeq)</label>
+                    <label className="text-[11px] text-red-400 font-medium block, mb-1">رابط رفيق المباشر (Rafeeq)</label>
                     <input
                       type="url"
                       value={brand.rafeeq_url || ''}
