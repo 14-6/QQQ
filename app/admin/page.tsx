@@ -8,6 +8,7 @@ import Link from 'next/link';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
+const [contactMessages, setContactMessages] = useState<any[]>([]);
 
 interface Brand {
   id?: number;
@@ -124,6 +125,7 @@ export default function AdminPanel() {
 
   const fetchData = async () => {
     setLoading(true);
+    
     const { data: brandsData } = await supabase.from('brands').select('*').order('id', { ascending: true });
     if (brandsData) setBrands(brandsData);
 
@@ -137,6 +139,7 @@ export default function AdminPanel() {
     if (messagesData) setContactMessages(messagesData);
 
     setLoading(false);
+    
   };
 
   const handleInputChange = (index: number, field: keyof Brand, value: any) => {
