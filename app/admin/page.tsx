@@ -19,7 +19,8 @@ import {
   Lock, 
   LogOut,
   Search,
-  Filter
+  Filter,
+  Link as LinkIcon
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -184,7 +185,6 @@ export default function AdminPanel() {
     }
   };
 
-  // دالة تُستدعى عند الضغط على أزرار التواصل للتحويل التلقائي لـ "تم الرد"
   const handleContactAction = (id: string | number, table: 'ad_requests' | 'messages', currentStatus?: string) => {
     if (!currentStatus || currentStatus === 'new') {
       updateStatus(id, table, 'contacted');
@@ -289,7 +289,6 @@ export default function AdminPanel() {
     setBrands([...brands, newBrand]);
   };
 
-  // تصفية وقوائم تصفية طلبات الإعلانات
   const filteredAdRequests = adRequests.filter(req => {
     const matchesSearch = 
       (req.full_name || '').toLowerCase().includes(adSearch.toLowerCase()) ||
@@ -305,7 +304,6 @@ export default function AdminPanel() {
     return matchesSearch && matchesStatus;
   });
 
-  // تصفية وقوائم تصفية رسائل اتصل بنا
   const filteredContactMessages = contactMessages.filter(msg => {
     const matchesSearch = 
       (msg.name || '').toLowerCase().includes(msgSearch.toLowerCase()) ||
@@ -431,7 +429,6 @@ export default function AdminPanel() {
             </span>
           </div>
 
-          {/* شريط البحث والفلترة لطلبات الإعلانات */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-neutral-950 p-3 rounded-xl border border-white/5">
             <div className="relative w-full sm:w-72">
               <Search className="w-4 h-4 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2" />
@@ -480,7 +477,6 @@ export default function AdminPanel() {
                         {new Date(req.created_at).toLocaleString('ar-QA')}
                       </span>
 
-                      {/* حالة الطلب */}
                       <select
                         value={req.status || 'new'}
                         onChange={(e) => updateStatus(req.id, 'ad_requests', e.target.value)}
@@ -570,7 +566,6 @@ export default function AdminPanel() {
             </span>
           </div>
 
-          {/* شريط البحث والفلترة لرسائل اتصل بنا */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-neutral-950 p-3 rounded-xl border border-white/5">
             <div className="relative w-full sm:w-72">
               <Search className="w-4 h-4 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2" />
@@ -619,7 +614,6 @@ export default function AdminPanel() {
                         {new Date(msg.created_at).toLocaleString('ar-QA')}
                       </span>
 
-                      {/* حالة الرسالة */}
                       <select
                         value={msg.status || 'new'}
                         onChange={(e) => updateStatus(msg.id, 'messages', e.target.value)}
@@ -682,7 +676,160 @@ export default function AdminPanel() {
           )}
         </div>
 
-        {/* ⚙️ إعدادات الموقع */}
+        {/* 🍔 قائمة إدارة البراندات وروابط التوصيل (سنونو، طلبات، رفيق) */}
+        <div className="bg-neutral-900 border border-amber-500/20 rounded-2xl p-6 shadow-xl space-y-6">
+          <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <div className="flex items-center gap-2 text-amber-400">
+              <Building2 className="w-5 h-5" />
+              <h2 className="font-bold text-base text-white">إدارة براندات ومطاعم QQQ وروابط التوصيل</h2>
+            </div>
+            <button
+              onClick={addNewBrand}
+              className="px-3 py-1.5 bg-amber-400 text-black text-xs font-bold rounded-lg hover:bg-amber-300 transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>إضافة براند</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            {brands.map((brand, idx) => (
+              <div key={brand.id || idx} className="bg-neutral-950 border border-white/10 rounded-2xl p-5 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                  
+                  {/* الشعار والحزمة الحالية */}
+                  <div className="flex items-center gap-4">
+                    <div className="relative w-16 h-16 rounded-2xl bg-neutral-900 border border-white/10 overflow-hidden flex items-center justify-center p-2 group">
+                      <img src={brand.logo} alt={brand.name} className="w-full h-full object-contain" />
+                      <label className="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <Upload className="w-4 h-4 text-amber-400" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) handleFileUpload(idx, e.target.files[0]);
+                          }}
+                        />
+                      </label>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-sm text-white">{brand.arabic_name || brand.name}</h3>
+                      <p className="text-xs text-amber-400/80 dir-ltr">{brand.handle}</p>
+                    </div>
+                  </div>
+
+                  {/* معلومات البراند المباشرة */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <label className="text-[10px] text-neutral-400 block mb-1">الاسم بالإنجليزي</label>
+                      <input
+                        type="text"
+                        value={brand.name}
+                        onChange={(e) => handleInputChange(idx, 'name', e.target.value)}
+                        className="w-full bg-neutral-900 border border-white/10 rounded-lg p-2 text-white focus:border-amber-400 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-neutral-400 block mb-1">الاسم بالعربي</label>
+                      <input
+                        type="text"
+                        value={brand.arabic_name}
+                        onChange={(e) => handleInputChange(idx, 'arabic_name', e.target.value)}
+                        className="w-full bg-neutral-900 border border-white/10 rounded-lg p-2 text-white focus:border-amber-400 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* تصنيف وفئة البراند */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <label className="text-[10px] text-neutral-400 block mb-1">التصنيف (Category)</label>
+                      <select
+                        value={brand.category}
+                        onChange={(e) => handleInputChange(idx, 'category', e.target.value)}
+                        className="w-full bg-neutral-900 border border-white/10 rounded-lg p-2 text-white focus:border-amber-400 outline-none cursor-pointer"
+                      >
+                        <option value="fastfood">الوجبات السريعة (Fast Food)</option>
+                        <option value="sweets">الحلويات والكافيهات (Sweets & Cafes)</option>
+                        <option value="services">الخدمات والشركات (Services)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-neutral-400 block mb-1">اليوزر/الهاندل (@)</label>
+                      <input
+                        type="text"
+                        value={brand.handle}
+                        onChange={(e) => handleInputChange(idx, 'handle', e.target.value)}
+                        className="w-full bg-neutral-900 border border-white/10 rounded-lg p-2 text-white focus:border-amber-400 outline-none dir-ltr"
+                      />
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* 🛵 روابط تطبيقات التوصيل (سنونو، طلبات، رفيق) */}
+                <div className="pt-3 border-t border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-[10px] text-emerald-400 block mb-1 font-bold">رابط سنونو (Snoonu URL)</label>
+                    <input
+                      type="text"
+                      placeholder="https://snoonu.com/..."
+                      value={brand.snoonu_url || ''}
+                      onChange={(e) => handleInputChange(idx, 'snoonu_url', e.target.value)}
+                      className="w-full bg-neutral-900 border border-white/10 rounded-lg p-2 text-xs text-white focus:border-emerald-400 outline-none dir-ltr"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-orange-400 block mb-1 font-bold">رابط طلبات (Talabat URL)</label>
+                    <input
+                      type="text"
+                      placeholder="https://www.talabat.com/..."
+                      value={brand.talabat_url || ''}
+                      onChange={(e) => handleInputChange(idx, 'talabat_url', e.target.value)}
+                      className="w-full bg-neutral-900 border border-white/10 rounded-lg p-2 text-xs text-white focus:border-orange-400 outline-none dir-ltr"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-cyan-400 block mb-1 font-bold">رابط رفيق (Rafeeq URL)</label>
+                    <input
+                      type="text"
+                      placeholder="https://gorafeeq.com/..."
+                      value={brand.rafeeq_url || ''}
+                      onChange={(e) => handleInputChange(idx, 'rafeeq_url', e.target.value)}
+                      className="w-full bg-neutral-900 border border-white/10 rounded-lg p-2 text-xs text-white focus:border-cyan-400 outline-none dir-ltr"
+                    />
+                  </div>
+                </div>
+
+                {/* أزرار الحفظ والحذف */}
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    onClick={() => saveBrand(idx)}
+                    disabled={savingId === (brand.id || idx)}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-amber-400 hover:bg-amber-300 text-black font-bold rounded-xl text-xs transition-colors cursor-pointer"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>{savingId === (brand.id || idx) ? 'جاري الحفظ...' : 'حفظ البراند'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => deleteBrand(brand.id, idx)}
+                    className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors cursor-pointer"
+                    title="حذف البراند"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ⚙️ إعدادات الفوتر ووسائل التواصل الاجتماعي */}
         <div className="bg-neutral-900 border border-amber-500/20 rounded-2xl p-6 shadow-xl space-y-5">
           <div className="flex items-center gap-2 text-amber-400 border-b border-white/5 pb-3">
             <Settings className="w-5 h-5" />
@@ -741,7 +888,7 @@ export default function AdminPanel() {
             </div>
 
             <div>
-              <label className="text-[11px] text-neutral-400 block mb-1">رابط إنستغرام (عبدالله الغافري)</label>
+              <label className="text-[11px] text-neutral-400 block mb-1">رابط إنستغرام المجموعة</label>
               <input
                 type="text"
                 value={settings.social_instagram || ''}
@@ -751,7 +898,7 @@ export default function AdminPanel() {
             </div>
 
             <div>
-              <label className="text-[11px] text-neutral-400 block mb-1">رابط أو رقم واتساب (عبدالله الغافري)</label>
+              <label className="text-[11px] text-neutral-400 block mb-1">رقم واتساب الرئيسي (مع مفتاح الدولة)</label>
               <input
                 type="text"
                 value={settings.social_whatsapp || ''}
@@ -759,188 +906,17 @@ export default function AdminPanel() {
                 className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
               />
             </div>
-
-            <div>
-              <label className="text-[11px] text-neutral-400 block mb-1">نص الفوتر وحقوق النشر (عربي)</label>
-              <input
-                type="text"
-                value={settings.footer_text_ar || ''}
-                onChange={(e) => setSettings({ ...settings, footer_text_ar: e.target.value })}
-                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] text-neutral-400 block mb-1">Footer Text & Copyright (English)</label>
-              <input
-                type="text"
-                value={settings.footer_text_en || ''}
-                onChange={(e) => setSettings({ ...settings, footer_text_en: e.target.value })}
-                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-              />
-            </div>
           </div>
 
-          <div className="flex justify-end pt-2">
+          <div className="flex justify-end pt-3">
             <button
               onClick={saveSettings}
               disabled={savingSettings}
-              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-amber-400 text-black font-bold text-xs hover:bg-amber-300 transition-colors cursor-pointer"
+              className="px-6 py-3 bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs rounded-xl shadow-lg transition-colors flex items-center gap-2 cursor-pointer"
             >
               <Save className="w-4 h-4" />
-              <span>{savingSettings ? 'جاري الحفظ...' : 'حفظ إعدادات الموقع بالكامل'}</span>
+              <span>{savingSettings ? 'جاري الحفظ...' : 'حفظ إعدادات الموقع'}</span>
             </button>
-          </div>
-        </div>
-
-        {/* 🏷️ البراندات */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-white">
-            <Building2 className="w-5 h-5 text-amber-400" />
-            <h2 className="font-bold text-lg">قائمة البراندات والمطاعم</h2>
-          </div>
-
-          <div className="space-y-6">
-            {brands.map((brand, index) => (
-              <div key={brand.id || index} className="bg-neutral-900 border border-white/10 rounded-2xl p-5 shadow-xl transition-all">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                  <div className="md:col-span-3 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl p-4 bg-neutral-950/60">
-                    <div className="w-24 h-24 bg-black rounded-xl border border-white/10 flex items-center justify-center p-2 mb-3 relative overflow-hidden group">
-                      <img src={brand.logo} alt={brand.name} className="w-full h-full object-contain" />
-                    </div>
-
-                    <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-xs text-amber-400 cursor-pointer transition-colors border border-white/5">
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>{uploadingLogoIndex === index ? 'جاري الرفع...' : 'تغيير الشعار'}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          if (e.target.files?.[0]) handleFileUpload(index, e.target.files[0]);
-                        }}
-                      />
-                    </label>
-                  </div>
-
-                  <div className="md:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">الاسم بالإنجليزية</label>
-                      <input
-                        type="text"
-                        value={brand.name || ''}
-                        onChange={(e) => handleInputChange(index, 'name', e.target.value)}
-                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">الاسم بالعربية</label>
-                      <input
-                        type="text"
-                        value={brand.arabic_name || ''}
-                        onChange={(e) => handleInputChange(index, 'arabic_name', e.target.value)}
-                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">المعرف (Instagram Handle)</label>
-                      <input
-                        type="text"
-                        value={brand.handle || ''}
-                        onChange={(e) => handleInputChange(index, 'handle', e.target.value)}
-                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">الفروع بالعربي (افصل بفاصلة)</label>
-                      <input
-                        type="text"
-                        value={Array.isArray(brand.locations_ar) ? brand.locations_ar.join(', ') : brand.locations_ar || ''}
-                        onChange={(e) => handleInputChange(index, 'locations_ar', e.target.value.split(',').map(s => s.trim()))}
-                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">الفروع بالإنجليزي (افصل بفاصلة)</label>
-                      <input
-                        type="text"
-                        value={Array.isArray(brand.locations_en) ? brand.locations_en.join(', ') : brand.locations_en || ''}
-                        onChange={(e) => handleInputChange(index, 'locations_en', e.target.value.split(',').map(s => s.trim()))}
-                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">الفئة (Category Filter)</label>
-                      <select
-                        value={brand.category || 'fastfood'}
-                        onChange={(e) => handleInputChange(index, 'category', e.target.value)}
-                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none"
-                      >
-                        <option value="fastfood">مطاعم وبرجر</option>
-                        <option value="cafe">كافيهات</option>
-                        <option value="sweets">حلويات</option>
-                        <option value="breakfast">فطور</option>
-                        <option value="healthy">صحي ومجمدات</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">رابط سنونو (Snoonu URL)</label>
-                      <input
-                        type="text"
-                        value={brand.snoonu_url || ''}
-                        onChange={(e) => handleInputChange(index, 'snoonu_url', e.target.value)}
-                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">رابط طلبات (Talabat URL)</label>
-                      <input
-                        type="text"
-                        value={brand.talabat_url || ''}
-                        onChange={(e) => handleInputChange(index, 'talabat_url', e.target.value)}
-                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] text-neutral-400 block mb-1">رابط رفيق (Rafeeq URL)</label>
-                      <input
-                        type="text"
-                        value={brand.rafeeq_url || ''}
-                        onChange={(e) => handleInputChange(index, 'rafeeq_url', e.target.value)}
-                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end gap-2 pt-4 mt-4 border-t border-white/5">
-                  <button
-                    onClick={() => deleteBrand(brand.id, index)}
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold hover:bg-red-500/20 transition-colors"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>حذف البراند</span>
-                  </button>
-
-                  <button
-                    onClick={() => saveBrand(index)}
-                    disabled={savingId === (brand.id || index)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 text-black font-bold text-xs hover:bg-amber-300 transition-colors cursor-pointer"
-                  >
-                    <Save className="w-3.5 h-3.5" />
-                    <span>{savingId === (brand.id || index) ? 'جاري الحفظ...' : 'حفظ البراند'}</span>
-                  </button>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
 
