@@ -550,7 +550,7 @@ export default function Home() {
         <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.68a6.34 6.34 0 0 0 10.86 4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.54z"/></svg>
       </a>
       
-      {/* Snapchat */}
+{/* Snapchat */}
   <a 
     href={snapchatUrl} 
     target="_blank" 
@@ -558,7 +558,7 @@ export default function Home() {
     className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-neutral-900/90 border border-neutral-800 hover:border-amber-400/50 flex items-center justify-center text-neutral-300 hover:text-amber-400 transition-all duration-300 shadow-lg hover:scale-110"
     title="Snapchat"
   >
-   <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.205 2c-3.14 0-5.873 2.108-5.873 5.483 0 2.215 1.155 3.593 2.14 4.414.64.53 1.096.908 1.096 1.583 0 .42-.315.823-.882.823-.42 0-.825-.226-1.347-.562-.23-.15-.467-.306-.723-.44-1.317-.692-3.83-1.04-3.83 2.378 0 1.947 1.343 3.507 4.192 4.453.791.261 1.638.455 2.502.593.18.029.362.057.545.084.286.042.576.082.871.12.876.113 1.834.237 2.766.495 1.579.441 2.802 1.385 3.395 2.57.172.348.514.58 1.002.58.742 0 1.258-.655 1.085-1.442-.254-1.154-.925-2.072-1.89-2.738-1.018-.702-2.316-1.11-3.664-1.284-.668-.086-1.344-.145-2.015-.205-.285-.025-.568-.051-.85-.08-.737-.074-1.428-.198-2.056-.405-.88-.289-1.391-.845-1.391-1.574 0-.585.341-1.033.916-1.373.498-.292 1.121-.523 1.69-.742.66-.252 1.272-.486 1.706-1.007.41-.493.591-1.146.502-1.838-.073-.574-.46-1.341-1.196-1.879-.909-.661-2.059-1.012-3.321-1.012z"/></svg>
+    <SnapchatIcon className="w-4 h-4" />
   </a>
       
       {/* YouTube */}
@@ -1030,8 +1030,8 @@ export default function Home() {
                   <a href={instagramUrl} target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
                     <InstagramIcon className="w-4 h-4" />
                   </a>
-                 <a href={snapchatUrl} target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors" title="Snapchat">
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.205 2c-3.14 0-5.873 2.108-5.873 5.483 0 2.215 1.155 3.593 2.14 4.414.64.53 1.096.908 1.096 1.583 0 .42-.315.823-.882.823-.42 0-.825-.226-1.347-.562-.23-.15-.467-.306-.723-.44-1.317-.692-3.83-1.04-3.83 2.378 0 1.947 1.343 3.507 4.192 4.453.791.261 1.638.455 2.502.593.18.029.362.057.545.084.286.042.576.082.871.12.876.113 1.834.237 2.766.495 1.579.441 2.802 1.385 3.395 2.57.172.348.514.58 1.002.58.742 0 1.258-.655 1.085-1.442-.254-1.154-.925-2.072-1.89-2.738-1.018-.702-2.316-1.11-3.664-1.284-.668-.086-1.344-.145-2.015-.205-.285-.025-.568-.051-.85-.08-.737-.074-1.428-.198-2.056-.405-.88-.289-1.391-.845-1.391-1.574 0-.585.341-1.033.916-1.373.498-.292 1.121-.523 1.69-.742.66-.252 1.272-.486 1.706-1.007.41-.493.591-1.146.502-1.838-.073-.574-.46-1.341-1.196-1.879-.909-.661-2.059-1.012-3.321-1.012z"/></svg>
+                  <a href={snapchatUrl} target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors" title="Snapchat">
+                    <SnapchatIcon className="w-4 h-4" />
                   </a>
                   <a href={tiktokUrl} target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
                     <TikTokIcon className="w-4 h-4" />
