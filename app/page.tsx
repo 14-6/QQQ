@@ -438,6 +438,24 @@ export default function Home() {
 {/* HEADER WITH PROMINENT & HIGHER QQQ BRAND */}
       <header className="relative w-full min-h-[580px] sm:min-h-[620px] lg:h-[85vh] overflow-hidden flex items-center justify-center text-white py-12 sm:py-0 bg-neutral-950 border-b border-white/10">
 
+          {/* 🎥 فيديو الخلفية المغبش والفخم (موضح أكثر) */}
+            <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                className="w-full h-full object-cover opacity-65 filter blur-[2px] scale-105"
+              >
+                <source src="/videos/clip1.mp4" type="video/mp4" />
+                متصفحك لا يدعم تشغيل الفيديو.
+              </video>
+              
+              {/* طبقة تظليل خفيفة جداً لضمان قراءة النصوص بدون إخفاء الفيديو */}
+              <div className="absolute inset-0 bg-[#09090b]/50 backdrop-blur-[1px]" />
+            </div>
+
         {/* TOP NAVIGATION BAR */}
         <div className="absolute top-4 left-0 right-0 z-50 px-4 sm:px-8 max-w-7xl mx-auto flex items-center justify-between gap-4" dir="ltr">
           
@@ -459,8 +477,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* BACKGROUND GRADIENT & AMBIENT GLOW ORBS */}
-        <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-neutral-900 via-neutral-950 to-[#121212]" />
+        {/* BACKGROUND GRADIENT & AMBIENT GLOW ORBS (فوق الفيديو بشفافية ليعطي تدرجاً فخماً) */}
+        <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-neutral-900/50 via-neutral-950/70 to-[#121212] z-10 pointer-events-none" />
         
         {/* Ambient Glow Orb 1 (Top Left) */}
         <div className="absolute -top-20 -left-20 w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] bg-amber-500/[0.07] blur-[140px] rounded-full pointer-events-none z-10" />
@@ -469,7 +487,7 @@ export default function Home() {
         <div className="absolute -bottom-20 -right-20 w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] bg-amber-600/[0.05] blur-[140px] rounded-full pointer-events-none z-10" />
 
         {/* Subtle Dot Grid Pattern */}
-        <div className="absolute inset-0 opacity-[0.1] bg-[radial-gradient(#fbbf24_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none z-10" />
+        <div className="absolute inset-0 opacity-[0.08] bg-[radial-gradient(#fbbf24_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none z-10" />
 
         {/* HERO CONTENT */}
         <div className="relative z-30 text-center px-4 max-w-4xl mx-auto flex flex-col items-center justify-center pt-10 sm:pt-6">
