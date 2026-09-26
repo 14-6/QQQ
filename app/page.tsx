@@ -425,6 +425,7 @@ export default function Home() {
   ];
 
   const instagramUrl = siteSettings?.instagram_url || '#';
+  const snapchatUrl = siteSettings?.snapchat_url || '#';
   const tiktokUrl = siteSettings?.tiktok_url || '#';
   const twitterUrl = siteSettings?.twitter_url || '#';
   const youtubeUrl = siteSettings?.youtube_url || '#';
@@ -548,6 +549,17 @@ export default function Home() {
       >
         <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.68a6.34 6.34 0 0 0 10.86 4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.54z"/></svg>
       </a>
+      
+      {/* Snapchat */}
+  <a 
+    href={snapchatUrl} 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-neutral-900/90 border border-neutral-800 hover:border-amber-400/50 flex items-center justify-center text-neutral-300 hover:text-amber-400 transition-all duration-300 shadow-lg hover:scale-110"
+    title="Snapchat"
+  >
+    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-3.957 1.406-3.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.654 2.569-.992 3.991-.282 1.194.598 2.167 1.776 2.167 2.133 0 3.771-2.247 3.771-5.494 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.892 2.741.098.12.112.225.083.348-.09.376-.29 1.172-.33 1.334-.052.218-.173.265-.399.16-1.488-.693-2.42-2.553-2.42-4.106 0-3.345 2.433-6.421 7.014-6.421 3.684 0 6.546 2.625 6.546 6.138 0 3.66-2.31 6.611-5.518 6.611-1.077 0-2.09-.56-2.436-1.219l-.66 2.518c-.239.919-.886 2.07-1.321 2.774 1.01.312 2.083.483 3.193.483 6.621 0 11.988-5.368 11.988-11.988S18.638 0 12.017 0z"/></svg>
+  </a>
       
       {/* YouTube */}
       <a 
@@ -1017,6 +1029,9 @@ export default function Home() {
                 <div className="flex flex-wrap gap-2 mb-6">
                   <a href={instagramUrl} target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
                     <InstagramIcon className="w-4 h-4" />
+                  </a>
+                 <a href={snapchatUrl} target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors" title="Snapchat">
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-3.957 1.406-3.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.654 2.569-.992 3.991-.282 1.194.598 2.167 1.776 2.167 2.133 0 3.771-2.247 3.771-5.494 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.892 2.741.098.12.112.225.083.348-.09.376-.29 1.172-.33 1.334-.052.218-.173.265-.399.16-1.488-.693-2.42-2.553-2.42-4.106 0-3.345 2.433-6.421 7.014-6.421 3.684 0 6.546 2.625 6.546 6.138 0 3.66-2.31 6.611-5.518 6.611-1.077 0-2.09-.56-2.436-1.219l-.66 2.518c-.239.919-.886 2.07-1.321 2.774 1.01.312 2.083.483 3.193.483 6.621 0 11.988-5.368 11.988-11.988S18.638 0 12.017 0z"/></svg>
                   </a>
                   <a href={tiktokUrl} target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-white/10 bg-neutral-900 text-neutral-300 hover:text-amber-400 transition-colors">
                     <TikTokIcon className="w-4 h-4" />
