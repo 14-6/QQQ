@@ -2,7 +2,23 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Save, Upload, Trash2, Plus, RefreshCw, ArrowLeft, Settings, Building2, MessageSquare, Calendar, Clock, Mail, Phone, Lock, LogOut } from 'lucide-react';
+import { 
+  Save, 
+  Upload, 
+  Trash2, 
+  Plus, 
+  RefreshCw, 
+  ArrowLeft, 
+  Settings, 
+  Building2, 
+  MessageSquare, 
+  Calendar, 
+  Clock, 
+  Mail, 
+  Phone, 
+  Lock, 
+  LogOut 
+} from 'lucide-react';
 import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -46,13 +62,16 @@ interface AdRequest {
   ad_time: string;
   project_details: string;
   created_at: string;
+  status?: string;
 }
+
 interface ContactMessage {
   id: number;
   name: string;
   contact: string;
   message: string;
   created_at: string;
+  status?: string;
 }
 
 export default function AdminPanel() {
@@ -134,18 +153,27 @@ export default function AdminPanel() {
     const { data: requestsData } = await supabase.from('ad_requests').select('*').order('created_at', { ascending: false });
     if (requestsData) setAdRequests(requestsData);
 
-const { data: messagesData, error } = await supabase
-  .from('messages')
-  .select('*')
-  .order('created_at', { ascending: false });
-
-console.log("Messages Data:", messagesData);
-console.log("Supabase Error:", error);
-
-if (messagesData) setContactMessages(messagesData);
+    const { data: messagesData } = await supabase.from('messages').select('*').order('created_at', { ascending: false });
+    if (messagesData) setContactMessages(messagesData);
 
     setLoading(false);
-    
+  };
+
+  const updateStatus = async (id: string | number, table: 'ad_requests' | 'messages', newStatus: string) => {
+    const { error } = await supabase
+      .from(table)
+      .update({ status: newStatus })
+      .eq('id', id);
+
+    if (!error) {
+      if (table === 'ad_requests') {
+        setAdRequests(prev => prev.map(item => item.id === id ? { ...item, status: newStatus } : item));
+      } else {
+        setContactMessages(prev => prev.map(item => item.id === id ? { ...item, status: newStatus } : item));
+      }
+    } else {
+      alert('حدث خطأ أثناء تحديث الحالة');
+    }
   };
 
   const handleInputChange = (index: number, field: keyof Brand, value: any) => {
@@ -364,12 +392,29 @@ if (messagesData) setContactMessages(messagesData);
             <div className="grid grid-cols-1 gap-4">
               {adRequests.map((req) => (
                 <div key={req.id} className="bg-neutral-950 border border-white/10 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="space-y-2">
+                  <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-sm text-white">{req.full_name}</span>
                       <span className="text-[10px] text-neutral-400 bg-neutral-900 px-2.5 py-1 rounded-md border border-white/5">
                         {new Date(req.created_at).toLocaleString('ar-QA')}
                       </span>
+
+                      {/* حالة الطلب */}
+                      <select
+                        value={req.status || 'new'}
+                        onChange={(e) => updateStatus(req.id, 'ad_requests', e.target.value)}
+                        className={`px-3 py-1 text-xs rounded-full border font-bold cursor-pointer outline-none transition-colors ${
+                          req.status === 'contacted'
+                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/40'
+                            : req.status === 'completed'
+                            ? 'bg-zinc-700/50 text-zinc-300 border-zinc-600'
+                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/40'
+                        }`}
+                      >
+                        <option value="new" className="bg-zinc-900 text-emerald-400">🟢 جديد</option>
+                        <option value="contacted" className="bg-zinc-900 text-blue-400">🔵 تم الرد</option>
+                        <option value="completed" className="bg-zinc-900 text-zinc-400">⚪ مكتمل</option>
+                      </select>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-300">
@@ -399,7 +444,7 @@ if (messagesData) setContactMessages(messagesData);
 
                   <div className="flex items-center gap-2 w-full md:w-auto justify-end">
                     <a
-                      href={`https://wa.me/${req.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`مرحباً بك ${req.full_name}، بخصوص طلبك لحجز مساحة إعلانية في مجموعة QQQ...`)}`}
+                      href={`https://wa.me/${req.whatsapp?.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`مرحباً بك ${req.full_name}، بخصوص طلبك لحجز مساحة إعلانية في مجموعة QQQ...`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition-colors"
@@ -430,8 +475,7 @@ if (messagesData) setContactMessages(messagesData);
           )}
         </div>
 
-
-     {/* 📬 رسائل نموذج "اتصل معنا" */}
+        {/* 📬 رسائل نموذج "اتصل معنا" */}
         <div className="bg-neutral-900 border border-cyan-500/20 rounded-2xl p-6 shadow-xl space-y-5">
           <div className="flex items-center justify-between border-b border-white/5 pb-3">
             <div className="flex items-center gap-2 text-cyan-400">
@@ -449,12 +493,29 @@ if (messagesData) setContactMessages(messagesData);
             <div className="grid grid-cols-1 gap-4">
               {contactMessages.map((msg) => (
                 <div key={msg.id} className="bg-neutral-950 border border-white/10 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="space-y-2">
+                  <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-sm text-white">{msg.name}</span>
                       <span className="text-[10px] text-neutral-400 bg-neutral-900 px-2.5 py-1 rounded-md border border-white/5">
                         {new Date(msg.created_at).toLocaleString('ar-QA')}
                       </span>
+
+                      {/* حالة الرسالة */}
+                      <select
+                        value={msg.status || 'new'}
+                        onChange={(e) => updateStatus(msg.id, 'messages', e.target.value)}
+                        className={`px-3 py-1 text-xs rounded-full border font-bold cursor-pointer outline-none transition-colors ${
+                          msg.status === 'contacted'
+                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/40'
+                            : msg.status === 'completed'
+                            ? 'bg-zinc-700/50 text-zinc-300 border-zinc-600'
+                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/40'
+                        }`}
+                      >
+                        <option value="new" className="bg-zinc-900 text-emerald-400">🟢 جديد</option>
+                        <option value="contacted" className="bg-zinc-900 text-blue-400">🔵 تم الرد</option>
+                        <option value="completed" className="bg-zinc-900 text-zinc-400">⚪ مكتمل</option>
+                      </select>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-300">
@@ -500,7 +561,6 @@ if (messagesData) setContactMessages(messagesData);
             </div>
           )}
         </div>
-
 
         {/* ⚙️ إعدادات الموقع */}
         <div className="bg-neutral-900 border border-amber-500/20 rounded-2xl p-6 shadow-xl space-y-5">
@@ -708,57 +768,55 @@ if (messagesData) setContactMessages(messagesData);
                         <option value="healthy">صحي ومجمدات</option>
                       </select>
                     </div>
+
+                    <div>
+                      <label className="text-[11px] text-neutral-400 block mb-1">رابط سنونو (Snoonu URL)</label>
+                      <input
+                        type="text"
+                        value={brand.snoonu_url || ''}
+                        onChange={(e) => handleInputChange(index, 'snoonu_url', e.target.value)}
+                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] text-neutral-400 block mb-1">رابط طلبات (Talabat URL)</label>
+                      <input
+                        type="text"
+                        value={brand.talabat_url || ''}
+                        onChange={(e) => handleInputChange(index, 'talabat_url', e.target.value)}
+                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] text-neutral-400 block mb-1">رابط رفيق (Rafeeq URL)</label>
+                      <input
+                        type="text"
+                        value={brand.rafeeq_url || ''}
+                        onChange={(e) => handleInputChange(index, 'rafeeq_url', e.target.value)}
+                        className="w-full bg-neutral-800/80 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-5 pt-4 border-t border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="text-[11px] text-amber-400 font-medium block mb-1">رابط سنونو المباشر (Snoonu)</label>
-                    <input
-                      type="url"
-                      value={brand.snoonu_url || ''}
-                      onChange={(e) => handleInputChange(index, 'snoonu_url', e.target.value)}
-                      className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-amber-400 outline-none dir-ltr"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] text-orange-400 font-medium block mb-1">رابط طلبات المباشر (Talabat)</label>
-                    <input
-                      type="url"
-                      value={brand.talabat_url || ''}
-                      onChange={(e) => handleInputChange(index, 'talabat_url', e.target.value)}
-                      className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-orange-400 outline-none dir-ltr"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] text-red-400 font-medium block mb-1">رابط رفيق المباشر (Rafeeq)</label>
-                    <input
-                      type="url"
-                      value={brand.rafeeq_url || ''}
-                      onChange={(e) => handleInputChange(index, 'rafeeq_url', e.target.value)}
-                      className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2 text-xs text-neutral-300 focus:border-red-400 outline-none dir-ltr"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-5 flex items-center justify-end gap-2 pt-3 border-t border-white/5">
+                <div className="flex items-center justify-end gap-2 pt-4 mt-4 border-t border-white/5">
                   <button
                     onClick={() => deleteBrand(brand.id, index)}
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs hover:bg-red-500/20 transition-colors cursor-pointer"
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold hover:bg-red-500/20 transition-colors"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                    <span>حذف</span>
+                    <span>حذف البراند</span>
                   </button>
 
                   <button
                     onClick={() => saveBrand(index)}
                     disabled={savingId === (brand.id || index)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition-colors cursor-pointer shadow-lg shadow-emerald-500/10"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 text-black font-bold text-xs hover:bg-amber-300 transition-colors cursor-pointer"
                   >
                     <Save className="w-3.5 h-3.5" />
-                    <span>{savingId === (brand.id || index) ? 'جاري الحفظ...' : 'حفظ التغييرات'}</span>
+                    <span>{savingId === (brand.id || index) ? 'جاري الحفظ...' : 'حفظ البراند'}</span>
                   </button>
                 </div>
               </div>
