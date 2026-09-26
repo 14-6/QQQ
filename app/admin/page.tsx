@@ -17,7 +17,9 @@ import {
   Mail, 
   Phone, 
   Lock, 
-  LogOut 
+  LogOut,
+  Search,
+  Filter
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -82,11 +84,18 @@ export default function AdminPanel() {
 
   const [brands, setBrands] = useState<Brand[]>([]);
   const [adRequests, setAdRequests] = useState<AdRequest[]>([]);
+  const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingLogoIndex, setUploadingLogoIndex] = useState<number | null>(null);
-  const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
+
+  // حالة البحث والفلترة
+  const [adSearch, setAdSearch] = useState('');
+  const [adFilterStatus, setAdFilterStatus] = useState('all');
+
+  const [msgSearch, setMsgSearch] = useState('');
+  const [msgFilterStatus, setMsgFilterStatus] = useState('all');
 
   const [settings, setSettings] = useState<SiteSettings>({
     header_video_url: '',
@@ -100,7 +109,6 @@ export default function AdminPanel() {
     social_whatsapp: ''
   });
 
-  // التحقق من حالة الجلسة عند فتح الصفحة
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -172,7 +180,14 @@ export default function AdminPanel() {
         setContactMessages(prev => prev.map(item => item.id === id ? { ...item, status: newStatus } : item));
       }
     } else {
-      alert('حدث خطأ أثناء تحديث الحالة');
+      console.error('حدث خطأ أثناء تحديث الحالة');
+    }
+  };
+
+  // دالة تُستدعى عند الضغط على أزرار التواصل للتحويل التلقائي لـ "تم الرد"
+  const handleContactAction = (id: string | number, table: 'ad_requests' | 'messages', currentStatus?: string) => {
+    if (!currentStatus || currentStatus === 'new') {
+      updateStatus(id, table, 'contacted');
     }
   };
 
@@ -274,7 +289,37 @@ export default function AdminPanel() {
     setBrands([...brands, newBrand]);
   };
 
-  // 🔒 شاشة تسجيل الدخول الآمنة عبر Supabase Auth
+  // تصفية وقوائم تصفية طلبات الإعلانات
+  const filteredAdRequests = adRequests.filter(req => {
+    const matchesSearch = 
+      (req.full_name || '').toLowerCase().includes(adSearch.toLowerCase()) ||
+      (req.email || '').toLowerCase().includes(adSearch.toLowerCase()) ||
+      (req.whatsapp || '').includes(adSearch) ||
+      (req.project_details || '').toLowerCase().includes(adSearch.toLowerCase());
+
+    const matchesStatus = 
+      adFilterStatus === 'all' || 
+      (adFilterStatus === 'new' && (!req.status || req.status === 'new')) ||
+      req.status === adFilterStatus;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  // تصفية وقوائم تصفية رسائل اتصل بنا
+  const filteredContactMessages = contactMessages.filter(msg => {
+    const matchesSearch = 
+      (msg.name || '').toLowerCase().includes(msgSearch.toLowerCase()) ||
+      (msg.contact || '').toLowerCase().includes(msgSearch.toLowerCase()) ||
+      (msg.message || '').toLowerCase().includes(msgSearch.toLowerCase());
+
+    const matchesStatus = 
+      msgFilterStatus === 'all' || 
+      (msgFilterStatus === 'new' && (!msg.status || msg.status === 'new')) ||
+      msg.status === msgFilterStatus;
+
+    return matchesSearch && matchesStatus;
+  });
+
   if (!session) {
     return (
       <div className="min-h-screen bg-neutral-950 text-white flex flex-col items-center justify-center p-4 dir-rtl font-sans">
@@ -382,15 +427,51 @@ export default function AdminPanel() {
               <h2 className="font-bold text-base text-white">طلبات حجز المساحات الإعلانية الواردة</h2>
             </div>
             <span className="px-3 py-1 bg-amber-400/10 text-amber-400 border border-amber-400/20 rounded-full text-xs font-bold">
-              {adRequests.length} طلبات
+              {filteredAdRequests.length} / {adRequests.length} طلبات
             </span>
           </div>
 
-          {adRequests.length === 0 ? (
-            <p className="text-xs text-neutral-400 text-center py-6">لا توجد طلبات حجز إعلانات حتى الآن.</p>
+          {/* شريط البحث والفلترة لطلبات الإعلانات */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-neutral-950 p-3 rounded-xl border border-white/5">
+            <div className="relative w-full sm:w-72">
+              <Search className="w-4 h-4 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="بحث باسم، هاتف أو إيميل..."
+                value={adSearch}
+                onChange={(e) => setAdSearch(e.target.value)}
+                className="w-full bg-neutral-900 border border-white/10 rounded-lg pr-9 pl-3 py-1.5 text-xs text-white focus:border-amber-400 outline-none"
+              />
+            </div>
+
+            <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto">
+              <Filter className="w-3.5 h-3.5 text-neutral-400 ml-1" />
+              {[
+                { id: 'all', label: 'الكل' },
+                { id: 'new', label: '🟢 جديد' },
+                { id: 'contacted', label: '🔵 تم الرد' },
+                { id: 'completed', label: '⚪ مكتمل' },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setAdFilterStatus(tab.id)}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                    adFilterStatus === tab.id 
+                      ? 'bg-amber-400 text-black font-bold' 
+                      : 'bg-neutral-900 text-neutral-400 hover:text-white border border-white/5'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {filteredAdRequests.length === 0 ? (
+            <p className="text-xs text-neutral-400 text-center py-6">لا توجد طلبات حجز مطابقة للبحث أو الفلتر.</p>
           ) : (
             <div className="grid grid-cols-1 gap-4">
-              {adRequests.map((req) => (
+              {filteredAdRequests.map((req) => (
                 <div key={req.id} className="bg-neutral-950 border border-white/10 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                   <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-3">
@@ -447,6 +528,7 @@ export default function AdminPanel() {
                       href={`https://wa.me/${req.whatsapp?.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`مرحباً بك ${req.full_name}، بخصوص طلبك لحجز مساحة إعلانية في مجموعة QQQ...`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => handleContactAction(req.id, 'ad_requests', req.status)}
                       className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition-colors"
                     >
                       <MessageSquare className="w-3.5 h-3.5" />
@@ -455,6 +537,7 @@ export default function AdminPanel() {
 
                     <a
                       href={`mailto:${req.email}?subject=${encodeURIComponent('بخصوص طلب حجز مساحة إعلانية - مجموعة QQQ')}&body=${encodeURIComponent(`مرحباً ${req.full_name},\n\nشكراً لتواصلك معنا بخصوص طلب إعلانك بمشروع QQQ.\n\nتحياتنا،`)}`}
+                      onClick={() => handleContactAction(req.id, 'ad_requests', req.status)}
                       className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition-colors"
                     >
                       <Mail className="w-3.5 h-3.5" />
@@ -483,15 +566,51 @@ export default function AdminPanel() {
               <h2 className="font-bold text-base text-white">رسائل "اتصل معنا" الواردة</h2>
             </div>
             <span className="px-3 py-1 bg-cyan-400/10 text-cyan-400 border border-cyan-400/20 rounded-full text-xs font-bold">
-              {contactMessages.length} رسائل
+              {filteredContactMessages.length} / {contactMessages.length} رسائل
             </span>
           </div>
 
-          {contactMessages.length === 0 ? (
-            <p className="text-xs text-neutral-400 text-center py-6">لا توجد رسائل تواصل جديدة حتى الآن.</p>
+          {/* شريط البحث والفلترة لرسائل اتصل بنا */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-neutral-950 p-3 rounded-xl border border-white/5">
+            <div className="relative w-full sm:w-72">
+              <Search className="w-4 h-4 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="بحث باسم، هاتف أو نص الرسالة..."
+                value={msgSearch}
+                onChange={(e) => setMsgSearch(e.target.value)}
+                className="w-full bg-neutral-900 border border-white/10 rounded-lg pr-9 pl-3 py-1.5 text-xs text-white focus:border-cyan-400 outline-none"
+              />
+            </div>
+
+            <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto">
+              <Filter className="w-3.5 h-3.5 text-neutral-400 ml-1" />
+              {[
+                { id: 'all', label: 'الكل' },
+                { id: 'new', label: '🟢 جديد' },
+                { id: 'contacted', label: '🔵 تم الرد' },
+                { id: 'completed', label: '⚪ مكتمل' },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setMsgFilterStatus(tab.id)}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                    msgFilterStatus === tab.id 
+                      ? 'bg-cyan-400 text-black font-bold' 
+                      : 'bg-neutral-900 text-neutral-400 hover:text-white border border-white/5'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {filteredContactMessages.length === 0 ? (
+            <p className="text-xs text-neutral-400 text-center py-6">لا توجد رسائل تواصل مطابقة للبحث أو الفلتر.</p>
           ) : (
             <div className="grid grid-cols-1 gap-4">
-              {contactMessages.map((msg) => (
+              {filteredContactMessages.map((msg) => (
                 <div key={msg.id} className="bg-neutral-950 border border-white/10 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                   <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-3">
@@ -534,6 +653,7 @@ export default function AdminPanel() {
                   <div className="flex items-center gap-2 w-full md:w-auto justify-end">
                     <a
                       href={`mailto:${msg.contact}?subject=${encodeURIComponent('الرد على استفسارك - مجموعة QQQ')}&body=${encodeURIComponent(`مرحباً ${msg.name},\n\nشكراً لتواصلك معنا.\n\nتحياتنا،`)}`}
+                      onClick={() => handleContactAction(msg.id, 'messages', msg.status)}
                       className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition-colors"
                     >
                       <Mail className="w-3.5 h-3.5" />
