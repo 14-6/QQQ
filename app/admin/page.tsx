@@ -52,10 +52,15 @@ interface SiteSettings {
   header_subtitle_en: string;
   footer_text_ar: string;
   footer_text_en: string;
-  social_instagram: string;
-  social_whatsapp: string;
+  instagram_url: string;
+  twitter_url: string;
+  tiktok_url: string;
+  youtube_url: string;
+  snapchat_url: string;
+  whatsapp_url: string;
+  email_url: string;
+  facebook_url: string; 
 }
-
 interface AdRequest {
   id: string;
   full_name: string;
@@ -98,7 +103,7 @@ export default function AdminPanel() {
   const [msgSearch, setMsgSearch] = useState('');
   const [msgFilterStatus, setMsgFilterStatus] = useState('all');
 
-  const [settings, setSettings] = useState<SiteSettings>({
+const [settings, setSettings] = useState<SiteSettings>({
     header_video_url: '',
     header_title_ar: '',
     header_title_en: '',
@@ -106,8 +111,14 @@ export default function AdminPanel() {
     header_subtitle_en: '',
     footer_text_ar: '',
     footer_text_en: '',
-    social_instagram: '',
-    social_whatsapp: ''
+    instagram_url: '',
+    twitter_url: '',
+    tiktok_url: '',
+    youtube_url: '',
+    snapchat_url: '',
+    whatsapp_url: '',
+    email_url: '',
+    facebook_url: ''
   });
 
   useEffect(() => {
@@ -829,7 +840,7 @@ export default function AdminPanel() {
           </div>
         </div>
 
-        {/* ⚙️ إعدادات الفوتر ووسائل التواصل الاجتماعي */}
+  {/* ⚙️ إعدادات الهيدر والفوتر ووسائل التواصل */}
         <div className="bg-neutral-900 border border-amber-500/20 rounded-2xl p-6 shadow-xl space-y-5">
           <div className="flex items-center gap-2 text-amber-400 border-b border-white/5 pb-3">
             <Settings className="w-5 h-5" />
@@ -887,26 +898,88 @@ export default function AdminPanel() {
               />
             </div>
 
+            {/* روابط وسائل التواصل الاجتماعي */}
             <div>
-              <label className="text-[11px] text-neutral-400 block mb-1">رابط إنستغرام المجموعة</label>
+              <label className="text-[11px] text-neutral-400 block mb-1">رابط إنستغرام (Instagram URL)</label>
               <input
                 type="text"
-                value={settings.social_instagram || ''}
-                onChange={(e) => setSettings({ ...settings, social_instagram: e.target.value })}
+                value={settings.instagram_url || ''}
+                onChange={(e) => setSettings({ ...settings, instagram_url: e.target.value })}
                 className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
               />
             </div>
 
             <div>
-              <label className="text-[11px] text-neutral-400 block mb-1">رقم واتساب الرئيسي (مع مفتاح الدولة)</label>
+              <label className="text-[11px] text-neutral-400 block mb-1">رابط تويتر / إكس (Twitter/X URL)</label>
               <input
                 type="text"
-                value={settings.social_whatsapp || ''}
-                onChange={(e) => setSettings({ ...settings, social_whatsapp: e.target.value })}
+                value={settings.twitter_url || ''}
+                onChange={(e) => setSettings({ ...settings, twitter_url: e.target.value })}
+                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] text-neutral-400 block mb-1">رابط تيك توك (TikTok URL)</label>
+              <input
+                type="text"
+                value={settings.tiktok_url || ''}
+                onChange={(e) => setSettings({ ...settings, tiktok_url: e.target.value })}
+                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] text-neutral-400 block mb-1">رابط يوتيوب (YouTube URL)</label>
+              <input
+                type="text"
+                value={settings.youtube_url || ''}
+                onChange={(e) => setSettings({ ...settings, youtube_url: e.target.value })}
+                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] text-neutral-400 block mb-1">رابط سناب شات (Snapchat URL)</label>
+              <input
+                type="text"
+                value={settings.snapchat_url || ''}
+                onChange={(e) => setSettings({ ...settings, snapchat_url: e.target.value })}
+                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] text-neutral-400 block mb-1">رابط فيسبوك (Facebook URL)</label>
+              <input
+                type="text"
+                value={settings.facebook_url || ''}
+                onChange={(e) => setSettings({ ...settings, facebook_url: e.target.value })}
+                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] text-neutral-400 block mb-1">رقم واتساب الرئيسي (WhatsApp)</label>
+              <input
+                type="text"
+                value={settings.whatsapp_url || ''}
+                onChange={(e) => setSettings({ ...settings, whatsapp_url: e.target.value })}
+                className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] text-neutral-400 block mb-1">البريد الإلكتروني (Email)</label>
+              <input
+                type="text"
+                value={settings.email_url || ''}
+                onChange={(e) => setSettings({ ...settings, email_url: e.target.value })}
                 className="w-full bg-neutral-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:border-amber-400 outline-none dir-ltr"
               />
             </div>
           </div>
+        </div>
 
           <div className="flex justify-end pt-3">
             <button
@@ -921,6 +994,5 @@ export default function AdminPanel() {
         </div>
 
       </div>
-    </div>
   );
 }
