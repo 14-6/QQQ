@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import AdBookingForm from './AdBookingForm';
 import { createClient } from '@supabase/supabase-js';
+import Navbar from './components/Navbar';
 
 // تهيئة عميل Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -202,9 +203,23 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [videoSources.length]);
 
-  const toggleLanguage = () => {
-    setLang(prev => (prev === 'ar' ? 'en' : 'ar'));
-  };
+  // الاستماع لتغيير اللغة القادم من الـ Navbar
+  useEffect(() => {
+    const checkLang = () => {
+      const savedLang = localStorage.getItem('qqq_lang') as 'ar' | 'en';
+      if (savedLang) {
+        setLang(savedLang);
+      }
+    };
+
+    // التحقق عند التحميل الأول
+    checkLang();
+
+    // الاستماع للحدث المخصص من الـ Navbar
+    window.addEventListener('languageChange', checkLang);
+    return () => window.removeEventListener('languageChange', checkLang);
+  }, []);
+
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -435,7 +450,6 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#121212] text-white font-sans overflow-x-hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
 
-
 {/* HEADER WITH PROMINENT & HIGHER QQQ BRAND */}
 <header className="relative w-full min-h-[580px] sm:min-h-[620px] lg:h-[85vh] overflow-hidden flex items-center justify-center text-white py-12 sm:py-0 bg-neutral-950 border-b border-white/10">
 
@@ -455,27 +469,6 @@ export default function Home() {
     
     {/* طبقة تظليل خفيفة جداً لضمان وضوح النصوص بدون إخفاء الفيديو */}
     <div className="absolute inset-0 bg-[#09090b]/50 backdrop-blur-[1px]" />
-  </div>
-
-  {/* TOP NAVIGATION BAR */}
-  <div className="absolute top-4 left-0 right-0 z-50 px-4 sm:px-8 max-w-7xl mx-auto flex items-center justify-between gap-4" dir="ltr">
-    
-    {/* Language Switcher */}
-    <button
-      onClick={toggleLanguage}
-      className="flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-semibold border border-white/20 bg-neutral-900/80 hover:bg-neutral-800 text-amber-400 backdrop-blur-md transition-all duration-300 active:scale-95 shrink-0 whitespace-nowrap shadow-sm cursor-pointer"
-    >
-      <Globe className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-      <span>{lang === 'ar' ? 'English' : 'عربي'}</span>
-    </button>
-
-    {/* Empty spacer to balance flex alignment */}
-    <div className="w-10"></div>
-
-    {/* Right Action: Ad Booking Form */}
-    <div className="shrink-0 flex items-center">
-      <AdBookingForm lang={lang} />
-    </div>
   </div>
 
   {/* BACKGROUND GRADIENT & AMBIENT GLOW ORBS */}
