@@ -1,21 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  /* خلفية أوف وايت دافئة ومريحة جداً للعين */
-  --background: #f4f4f2;
-  --foreground: #1c1917;
+  /* ==========================================
+     1. النظام العام للألوان (متغيرات مركزية لكل الموقع)
+     ========================================== */
+  --site-bg: #121214;            /* الخلفية العامة للصفحات الفاتحة */
+  --site-foreground: #1c1917;    /* النصوص العامة */
+  
+  /* ألوان الأقسام الغامقة (مثل صفحة من نحن والسكشنات المخصصة) */
+  --bg-main: #121214;            
+  --bg-section: #121214;         
+  --bg-card: #1f1f23;            
+  
+  /* الحدود واللون الملوكي الموحد لكل الموقع */
+  --border-color: #27272a;       
+  --accent-gold: #d4af37;        
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--site-bg);
+  --color-foreground: var(--site-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: var(--site-bg);
+  color: var(--site-foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -23,51 +34,55 @@ body {
 @tailwind components;
 @tailwind utilities;
 
-/* إصلاح التباين التلقائي للرمادي والأوف وايت والذهبي */
+/* ==========================================
+   2. التوحيد الشامل لكروت وأقسام كل الصفحات 
+   ========================================== */
 
-/* 1. خلفيات الكروت والأقسام */
-.bg-neutral-900,
-.bg-neutral-950,
-.bg-black\/55 {
-  background-color: rgba(28, 25, 23, 0.75) !important;
+/* خلفيات الكروت الموحدة في كل الموقع (الرئيسية، من نحن، الإدارة، وغيرها) */
+.custom-card-bg {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
 }
 
-.bg-neutral-800,
-.bg-\[\#303030\] {
-  background-color: #262626 !important;
+/* خلفيات الأقسام والسكشنات والصفحات الغامقة (مثل صفحة من نحن وحجز الإعلان) */
+.custom-section-bg {
+  background-color: var(--bg-section) !important;
+  border-color: var(--border-color) !important;
+  color: #fafaf9 !important;
 }
 
-/* 2. تصحيح ألوان النصوص لتكون واضحة تماماً */
+/* اللون الذهبي الموحد لكل أزرار ونصوص وتفاعلات الموقع */
+.text-gold {
+  color: var(--accent-gold) !important;
+}
+
+.border-gold {
+  border-color: var(--accent-gold) !important;
+}
+
+/* ==========================================
+   3. توحيد تباين النصوص والعناصر في كل الصفحات
+   ========================================== */
 .text-white,
-h1, h2, h3 {
-  color: #fafaf9 !important; /* أبيض دافئ عالي التباين للنصوص الهامة */
+h1, h2, h3, h4, h5, h6 {
+  color: #fafaf9 !important;
 }
 
-.text-neutral-400,
-.text-gray-400,
-p {
-  color: #d6d3d1 !important; /* رمادي فاتح مريح وواضح */
+p, span, .text-neutral-400, .text-gray-400 {
+  color: #d6d3d1 !important;
 }
 
-/* 3. عناصر الذهبي الملوكي */
-.text-amber-400,
-.text-amber-500 {
-  color: #d4af37 !important;
-}
-
+/* أزرار وعناصر الأهمية (الذهبية والصفراء) */
 .bg-amber-400,
-.bg-amber-500 {
-  background-color: #d4af37 !important;
+.bg-amber-500,
+.bg-gold {
+  background-color: var(--accent-gold) !important;
   color: #1c1917 !important;
 }
 
-.border-amber-400,
-.border-amber-400\/40 {
-  border-color: #d4af37 !important;
-}
-
-/* 4. إخفاء خلفية الفوتر البيضاء الحادة لتنسجم مع باقي الصفحة */
+/* توحيد الفوتر في كل صفحات الموقع */
 footer,
 footer .bg-neutral-950 {
   background-color: #18181b !important;
+  border-color: var(--border-color) !important;
 }

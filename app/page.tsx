@@ -979,7 +979,7 @@ export default function Home() {
                           {lang === 'ar' ? platform.name : platform.nameEn}
                         </span>
                       </div>
-                      <ExternalLink className="w-4 h-4 text-amber-400 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-transform" />
+                    
                     </a>
                   ))
                 ) : (
